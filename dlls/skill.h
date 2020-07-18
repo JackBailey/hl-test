@@ -135,6 +135,9 @@ struct skilldata_t
 	float plrStomach;
 	float plrLeg;
 	float plrArm;
+
+	// jay - new skill defines
+	float assaultHealth;
 };
 
 extern	DLL_GLOBAL	skilldata_t	gSkillData;

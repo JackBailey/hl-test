@@ -448,6 +448,11 @@ cvar_t	sk_player_leg1	= { "sk_player_leg1","1" };
 cvar_t	sk_player_leg2	= { "sk_player_leg2","1" };
 cvar_t	sk_player_leg3	= { "sk_player_leg3","1" };
 
+// jay - new skill defines
+cvar_t	sk_hassault_health1	= { "sk_hassault_health1","0" };
+cvar_t	sk_hassault_health2	= { "sk_hassault_health2","0" };
+cvar_t	sk_hassault_health3	= { "sk_hassault_health3","0" };
+
 // END Cvars for Skill Level settings
 
 // Register your console variables here
@@ -883,8 +888,13 @@ void GameDLLInit( void )
 	CVAR_REGISTER ( &sk_player_leg1 );
 	CVAR_REGISTER ( &sk_player_leg2 );
 	CVAR_REGISTER ( &sk_player_leg3 );
+
+	// jay - new skill defines
+	CVAR_REGISTER ( &sk_hassault_health1 );
+	CVAR_REGISTER ( &sk_hassault_health2 );
+	CVAR_REGISTER ( &sk_hassault_health3 );
+
 // END REGISTER CVARS FOR SKILL LEVEL STUFF
 
 	SERVER_COMMAND( "exec skill.cfg\n" );
 }
-

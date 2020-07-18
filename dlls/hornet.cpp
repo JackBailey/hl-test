@@ -100,6 +100,8 @@ void CHornet :: Spawn( void )
 	if ( !pSoundEnt )
 		pSoundEnt = edict();
 
+	EMIT_SOUND (pSoundEnt, CHAN_WEAPON, "agrunt/ag_fire.wav", 1, ATTN_NORM);
+
 	if ( !FNullEnt(pev->owner) && (pev->owner->v.flags & FL_CLIENT) )
 	{
 		pev->dmg = gSkillData.plrDmgHornet;

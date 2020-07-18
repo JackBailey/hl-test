@@ -61,6 +61,7 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_flFieldOfView, FIELD_FLOAT ),
 	DEFINE_FIELD( CBaseMonster, m_flWaitFinished, FIELD_TIME ),
 	DEFINE_FIELD( CBaseMonster, m_flMoveWaitFinished, FIELD_TIME ),
+	DEFINE_FIELD( CBaseMonster, m_flLastYawTime, FIELD_TIME ),	// magic nipples - yaw speed fix
 
 	DEFINE_FIELD( CBaseMonster, m_Activity, FIELD_INTEGER ),
 	DEFINE_FIELD( CBaseMonster, m_IdealActivity, FIELD_INTEGER ),
@@ -2537,7 +2538,18 @@ float CBaseMonster::ChangeYaw ( int yawSpeed )
 	ideal = pev->ideal_yaw;
 	if (current != ideal)
 	{
-		speed = (float)yawSpeed * gpGlobals->frametime * 10;
+		//speed = (float)yawSpeed * gpGlobals->frametime * 10;
+
+		// magic nipples - yaw speed fix START
+		float delta = gpGlobals->time - m_flLastYawTime;
+
+		// Clamp delta like the engine does with frametime
+		if (delta > 0.25)
+			delta = 0.25;
+
+		speed = (float)yawSpeed * delta * 2;
+		// magic nipples - yaw speed fix END
+
 		move = ideal - current;
 
 		if (ideal > current)

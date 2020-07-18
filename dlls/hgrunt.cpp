@@ -1053,6 +1053,9 @@ void CHGrunt :: Precache()
 	PRECACHE_SOUND( "hgrunt/gr_die1.wav" );
 	PRECACHE_SOUND( "hgrunt/gr_die2.wav" );
 	PRECACHE_SOUND( "hgrunt/gr_die3.wav" );
+	PRECACHE_SOUND( "hgrunt/gr_die4.wav" );
+	PRECACHE_SOUND( "hgrunt/gr_die5.wav" );
+	PRECACHE_SOUND( "hgrunt/gr_die6.wav" );
 
 	PRECACHE_SOUND( "hgrunt/gr_pain1.wav" );
 	PRECACHE_SOUND( "hgrunt/gr_pain2.wav" );
@@ -1203,7 +1206,7 @@ void CHGrunt :: PainSound ( void )
 //=========================================================
 void CHGrunt :: DeathSound ( void )
 {
-	switch ( RANDOM_LONG(0,2) )
+	switch ( RANDOM_LONG(0,5) )
 	{
 	case 0:	
 		EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_die1.wav", 1, ATTN_IDLE );	
@@ -1213,6 +1216,15 @@ void CHGrunt :: DeathSound ( void )
 		break;
 	case 2:
 		EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_die3.wav", 1, ATTN_IDLE );	
+		break;
+	case 3:
+		EMIT_SOUND (ENT (pev), CHAN_VOICE, "hgrunt/gr_die4.wav", 1, ATTN_IDLE);
+		break;
+	case 4:
+		EMIT_SOUND (ENT (pev), CHAN_VOICE, "hgrunt/gr_die5.wav", 1, ATTN_IDLE);
+		break;
+	case 5:
+		EMIT_SOUND (ENT (pev), CHAN_VOICE, "hgrunt/gr_die6.wav", 1, ATTN_IDLE);
 		break;
 	}
 }
@@ -1228,7 +1240,7 @@ Task_t	tlGruntFail[] =
 {
 	{ TASK_STOP_MOVING,			0				},
 	{ TASK_SET_ACTIVITY,		(float)ACT_IDLE },
-	{ TASK_WAIT,				(float)2		},
+	{ TASK_WAIT,				(float)0.25		},	// jay - changed delay from 2
 	{ TASK_WAIT_PVS,			(float)0		},
 };
 

@@ -133,17 +133,9 @@ void CSquidSpit :: Touch ( CBaseEntity *pOther )
 	// splat sound
 	iPitch = RANDOM_FLOAT( 90, 110 );
 
-	EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "bullchicken/bc_acid1.wav", 1, ATTN_NORM, 0, iPitch );	
+	EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "bullchicken/bc_acid.wav", 1, ATTN_NORM, 0, iPitch );	
 
-	switch ( RANDOM_LONG( 0, 1 ) )
-	{
-	case 0:
-		EMIT_SOUND_DYN( ENT(pev), CHAN_WEAPON, "bullchicken/bc_spithit1.wav", 1, ATTN_NORM, 0, iPitch );	
-		break;
-	case 1:
-		EMIT_SOUND_DYN( ENT(pev), CHAN_WEAPON, "bullchicken/bc_spithit2.wav", 1, ATTN_NORM, 0, iPitch );	
-		break;
-	}
+	EMIT_SOUND_DYN( ENT(pev), CHAN_WEAPON, "bullchicken/bc_spithit.wav", 1, ATTN_NORM, 0, iPitch );
 
 	if ( !pOther->pev->takedamage )
 	{
@@ -631,15 +623,8 @@ void CBullsquid :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				{
 					// croonchy bite sound
 					iPitch = RANDOM_FLOAT( 90, 110 );
-					switch ( RANDOM_LONG( 0, 1 ) )
-					{
-					case 0:
-						EMIT_SOUND_DYN( ENT(pev), CHAN_WEAPON, "bullchicken/bc_bite2.wav", 1, ATTN_NORM, 0, iPitch );	
-						break;
-					case 1:
-						EMIT_SOUND_DYN( ENT(pev), CHAN_WEAPON, "bullchicken/bc_bite3.wav", 1, ATTN_NORM, 0, iPitch );	
-						break;
-					}
+
+					EMIT_SOUND_DYN( ENT(pev), CHAN_WEAPON, "bullchicken/bc_bite.wav", 1, ATTN_NORM, 0, iPitch );
 
 					
 					//pHurt->pev->punchangle.x = RANDOM_LONG(0,34) - 5;
@@ -722,13 +707,11 @@ void CBullsquid :: Precache()
 	PRECACHE_SOUND("bullchicken/bc_attackgrowl2.wav");
 	PRECACHE_SOUND("bullchicken/bc_attackgrowl3.wav");
 
-	PRECACHE_SOUND("bullchicken/bc_acid1.wav");
+	PRECACHE_SOUND("bullchicken/bc_acid.wav");
 
-	PRECACHE_SOUND("bullchicken/bc_bite2.wav");
-	PRECACHE_SOUND("bullchicken/bc_bite3.wav");
+	PRECACHE_SOUND("bullchicken/bc_bite.wav");
 
-	PRECACHE_SOUND("bullchicken/bc_spithit1.wav");
-	PRECACHE_SOUND("bullchicken/bc_spithit2.wav");
+	PRECACHE_SOUND("bullchicken/bc_spithit.wav");
 
 }	
 

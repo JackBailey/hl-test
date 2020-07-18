@@ -59,7 +59,6 @@ void CL_LoadParticleMan( void );
 void CL_UnloadParticleMan( void );
 
 void InitInput (void);
-void EV_HookEvents( void );
 void IN_Commands( void );
 
 /*
@@ -153,7 +152,6 @@ int CL_DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 
 	memcpy(&gEngfuncs, pEnginefuncs, sizeof(cl_enginefunc_t));
 
-	EV_HookEvents();
 	CL_LoadParticleMan();
 
 	// get tracker interface, if any

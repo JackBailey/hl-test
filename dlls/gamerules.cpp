@@ -302,6 +302,9 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.plrStomach = GetSkillCvar( "sk_player_stomach" );
 	gSkillData.plrLeg = GetSkillCvar( "sk_player_leg" );
 	gSkillData.plrArm = GetSkillCvar( "sk_player_arm" );
+
+	// jay - new skill defines
+	gSkillData.assaultHealth = GetSkillCvar( "sk_hassault_health" );
 }
 
 //=========================================================

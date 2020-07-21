@@ -7,11 +7,49 @@ You're free to pick out any code snippets you want and use them in whatever way 
 
 However, if you choose to use this base in it's entirety, then you have to credit me, as well as have the source code for the mod that uses it publicly available.
 
+
+Feature List (probably incomplete)
+======================
+General:
+- Dynamically adjustable model scaling
+- Replaced blood splat effects with blood streams
+- Fixed raw mouse input
+
+Monsters:
+- Collision is off as soon as they die
+- Lowered stuck delay
+
+Zombies:
+- Unless specified otherwise through the map, zombies will randomize between scientists, barneys, or soldiers on spawn
+
+Weapons:
+- Completely removed client-side implementation; they're now fully server-side
+- Reloading, switching weapons, etc. doesn't stop you from using stuff anymore
+- Changed ammo counts
+
+Crowbar:
+- Changed and unified attack delay
+- Added viewpunch
+
+MP5:
+- Changed attack delay
+- Changed viewpunch amount on both primary and secondary attacks
+- Removed multiplayer spread
+
+Shotgun:
+- New shell ejection handling, now it actually works properly (more or less)
+- Cocking sound now handled by model
+- Removed multiplayer spread
+- Changed attack and reload delays
+
+
 Credits & Special Thanks
 ======================
 James - An absolute shit-ton of help. He taught me almost everything I know about HL1 modding. Oh, yeah, he also gave me code for some of the minor minor changes in this mod.
 
 The Spirit of Half-Life Team - Code snippet for customizable model scaling
+
+ZooL - Raw mouse input fix (from Half-Nuked)
 
 Jane - Motivating me to make stuff
 

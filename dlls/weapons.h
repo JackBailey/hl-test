@@ -124,7 +124,7 @@ public:
 #define WEAPON_NOCLIP			-1
 
 //#define CROWBAR_MAX_CLIP		WEAPON_NOCLIP
-#define GLOCK_MAX_CLIP			12	// jay - og was 17
+#define GLOCK_MAX_CLIP			18	// jay - og was 17
 #define PYTHON_MAX_CLIP			6
 #define MP5_MAX_CLIP			30	// jay - og was 50
 //#define MP5_DEFAULT_AMMO		25	// jay - this is unused

@@ -27,6 +27,7 @@
 #define	CROWBAR_WALLHIT_VOLUME 512
 
 #define	CROWBAR_VIEWPUNCH 3	// jay - crowbar viewpunch
+#define	CROWBAR_DELAY 0.4	// jay - unified attack delay
 
 class CCrowbar : public CBasePlayerWeapon
 {
@@ -224,7 +225,7 @@ int CCrowbar::Swing( int fFirst )
 			case 2:
 				SendWeaponAnim( CROWBAR_ATTACK3MISS ); break;
 			}
-			m_flNextPrimaryAttack = gpGlobals->time + 0.5;
+			m_flNextPrimaryAttack = gpGlobals->time + CROWBAR_DELAY;	// jay - og was 0.5
 			// play wiff or swish sound
 			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/cbar_miss1.wav", 1, ATTN_NORM, 0, 94 + RANDOM_LONG(0,0xF));
 
@@ -256,7 +257,7 @@ int CCrowbar::Swing( int fFirst )
 		pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgCrowbar, gpGlobals->v_forward, &tr, DMG_CLUB );	// jay - always do full damage
 		ApplyMultiDamage( m_pPlayer->pev, m_pPlayer->pev );
 
-		m_flNextPrimaryAttack = gpGlobals->time + 0.25;
+		m_flNextPrimaryAttack = gpGlobals->time + CROWBAR_DELAY;	// jay - og was 0.25
 
 		// play thwack, smack, or dong sound
 		float flVol = 1.0;

@@ -3867,16 +3867,12 @@ void CBasePlayer::ItemPostFrame()
 	if ( m_pTank != NULL )
 		return;
 
-#if defined( CLIENT_WEAPONS )
-    if ( m_flNextAttack > 0 )
-#else
+	ImpulseCommands();	// jay - moved one function above to fix not being able to use stuff while reloading/changing weps
+
     if ( gpGlobals->time < m_flNextAttack )
-#endif
 	{
 		return;
 	}
-
-	ImpulseCommands();
 
 	if (!m_pActiveItem)
 		return;

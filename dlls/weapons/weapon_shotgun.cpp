@@ -61,6 +61,8 @@ public:
 	// jay - new shell ejection
 	bool m_bFiredAlt;
 	Vector VecShellVelocity;
+	Vector VecShellVelocity1;
+	Vector VecShellVelocity2;
 	void ItemPostFrame( void );
 	void EjectShells( void );
 	void Holster( void );
@@ -160,9 +162,9 @@ void CShotgun::EjectShells( void )
 	else
 	{
 		EjectBrass (m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_up * -12 + gpGlobals->v_forward * 20 + gpGlobals->v_right * 4, 
-					VecShellVelocity, pev->angles.y, m_iShell, TE_BOUNCE_SHOTSHELL);
+					VecShellVelocity1, pev->angles.y, m_iShell, TE_BOUNCE_SHOTSHELL);
 		EjectBrass (m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_up * -12 + gpGlobals->v_forward * 20 + gpGlobals->v_right * 4, 
-					VecShellVelocity, pev->angles.y, m_iShell, TE_BOUNCE_SHOTSHELL);
+					VecShellVelocity2, pev->angles.y, m_iShell, TE_BOUNCE_SHOTSHELL);
 		m_bFiredAlt = false;
 	}
 
@@ -282,10 +284,14 @@ void CShotgun::SecondaryAttack( void )
 
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 		
-	VecShellVelocity = m_pPlayer->pev->velocity 
+	VecShellVelocity1 = m_pPlayer->pev->velocity 
 					 + gpGlobals->v_right * RANDOM_FLOAT(50,70) 
 					 + gpGlobals->v_up * RANDOM_FLOAT(100,150) 
 					 + gpGlobals->v_forward * 25;
+	VecShellVelocity2 = m_pPlayer->pev->velocity 
+					 + gpGlobals->v_right * RANDOM_FLOAT(50,70) 
+					 + gpGlobals->v_up * RANDOM_FLOAT(100,150) 
+					 + gpGlobals->v_forward * 15;
 
 	m_bFiredAlt = true;	// jay - new shell ejection
 

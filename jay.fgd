@@ -2240,7 +2240,7 @@
 		64 : "Start Inactive" : 0
 	]
 ]
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/zombie.mdl") = monster_zombie : "Zombie"
+@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) = monster_zombie : "Zombie"
 [
 	model(studio) : "Model (Random if empty)" : "models/zombie.mdl"	// jay - customize model
 ]

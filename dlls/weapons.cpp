@@ -148,9 +148,9 @@ void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage)
 
 	// jay - replace blood splats with streams
 	if (bloodColor == BLOOD_COLOR_GREEN)
-		UTIL_BloodStream( vecSpot, g_vecAttackDir, bloodColor, 200);
+		UTIL_BloodStream( vecSpot, -g_vecAttackDir, bloodColor, 200);	// og dir was g_vecAttackDir (towards attacker)
 	else
-		UTIL_BloodStream( vecSpot, g_vecAttackDir, (unsigned short)73, 200);
+		UTIL_BloodStream( vecSpot, -g_vecAttackDir, (unsigned short)73, 200);	// og dir was g_vecAttackDir (towards attacker)
 }
 
 
@@ -219,7 +219,7 @@ void EjectBrass ( const Vector &vecOrigin, const Vector &vecVelocity, float rota
 		WRITE_ANGLE( rotation );
 		WRITE_SHORT( model );
 		WRITE_BYTE ( soundtype);
-		WRITE_BYTE ( 25 );// 2.5 seconds
+		WRITE_BYTE ( 100 );// 2.5 seconds	// jay - og was 25; 100 is 10 seconds
 	MESSAGE_END();
 }
 

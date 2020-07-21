@@ -525,10 +525,10 @@ void CBaseMonster::BecomeDead( void )
 
 	// make the corpse fly away from the attack vector
 	pev->movetype = MOVETYPE_TOSS;
-	//pev->flags &= ~FL_ONGROUND;
-	//pev->origin.z += 2;
-	//pev->velocity = g_vecAttackDir * -1;
-	//pev->velocity = pev->velocity * RANDOM_FLOAT( 300, 400 );
+	pev->flags &= ~FL_ONGROUND;
+	pev->origin.z += 2;
+	pev->velocity = -g_vecAttackDir;
+	pev->velocity = pev->velocity * RANDOM_FLOAT( 150, 250 );	// jay - og values are 300, 400
 }
 
 

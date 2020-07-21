@@ -172,11 +172,18 @@ void CMP5::PrimaryAttack()
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
-	switch( RANDOM_LONG(0,1) )
+	// jay - changed firing sound handling
+	switch (RANDOM_LONG (0, 1))
 	{
-	case 0: EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/hks1.wav", 1, ATTN_NORM, 0, 94 + RANDOM_LONG(0,0xf)); break;
-	case 1: EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/hks2.wav", 1, ATTN_NORM, 0, 94 + RANDOM_LONG(0,0xf)); break;
-//	case 2: EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/hks3.wav", 1, ATTN_NORM); break;
+	case 0:
+		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/hks1.wav", VOL_NORM, ATTN_NORM, 0, RANDOM_FLOAT(95, 105));
+		break;
+	case 1:
+		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/hks2.wav", VOL_NORM, ATTN_NORM, 0, RANDOM_FLOAT(95, 105));
+		break;
+	case 2:
+		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/hks3.wav", VOL_NORM, ATTN_NORM, 0, RANDOM_FLOAT(95, 105));
+		break;
 	}
 
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
@@ -193,28 +200,19 @@ void CMP5::PrimaryAttack()
 	Vector vecSrc	 = m_pPlayer->GetGunPosition( );
 	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 	
-	if ( g_pGameRules->IsDeathmatch() )
-	{
-		// optimized multiplayer. Widened to make it easier to hit a moving player
-		m_pPlayer->FireBullets( 1, vecSrc, vecAiming, VECTOR_CONE_6DEGREES, 8192, BULLET_PLAYER_MP5, 2 );
-	}
-	else
-	{
-		// single player spread
-		m_pPlayer->FireBullets( 1, vecSrc, vecAiming, VECTOR_CONE_3DEGREES, 8192, BULLET_PLAYER_MP5, 2 );
-	}
+	m_pPlayer->FireBullets( 1, vecSrc, vecAiming, VECTOR_CONE_3DEGREES, 8192, BULLET_PLAYER_MP5, 2 );	// jay - always use singleplayer spread
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
 
-	m_flNextPrimaryAttack = m_flNextPrimaryAttack + 0.1;
+	m_flNextPrimaryAttack = m_flNextPrimaryAttack + 0.0875;	// jay - changed delay from 0.1
 	if (m_flNextPrimaryAttack < gpGlobals->time)
-		m_flNextPrimaryAttack = gpGlobals->time + 0.1;
+		m_flNextPrimaryAttack = gpGlobals->time + 0.0875;	// jay - changed delay from 0.1
 
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );
 
-	m_pPlayer->pev->punchangle.x = RANDOM_FLOAT( -2, 2 );
+	m_pPlayer->pev->punchangle.x = RANDOM_FLOAT( -2.5, 2.5 );	// jay - og values are -2, 2
 }
 
 
@@ -265,7 +263,7 @@ void CMP5::SecondaryAttack( void )
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
 
-	m_pPlayer->pev->punchangle.x -= 10;
+	m_pPlayer->pev->punchangle.x -= 5;	// jay - og value was 10
 }
 
 void CMP5::Reload( void )
@@ -284,22 +282,18 @@ void CMP5::WeaponIdle( void )
 	if (m_flTimeWeaponIdle > gpGlobals->time)
 		return;
 
-	int iAnim;
-	switch ( RANDOM_LONG( 0, 1 ) )
+	// jay - new idle anim handling
+	switch (RANDOM_LONG (0, 1))
 	{
-	case 0:	
-		iAnim = MP5_LONGIDLE;	
+	case 0:
+		SendWeaponAnim( MP5_LONGIDLE );
 		break;
-	
-	default:
 	case 1:
-		iAnim = MP5_IDLE1;
+		SendWeaponAnim( MP5_IDLE1 );
 		break;
 	}
 
-	SendWeaponAnim( iAnim );
-
-	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );// how long till we do this again.
+	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT (20, 25);
 }
 
 

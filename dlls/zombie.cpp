@@ -58,11 +58,27 @@ public:
 	static const char *pAttackHitSounds[];
 	static const char *pAttackMissSounds[];
 
+	// jay - new model stuff
+	static const char *pModels[];
+	int m_iBodyType;
+
 	// No range attacks
 	BOOL CheckRangeAttack1 ( float flDot, float flDist ) { return FALSE; }
 	BOOL CheckRangeAttack2 ( float flDot, float flDist ) { return FALSE; }
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
+
+	virtual int		Save(CSave& save);
+	virtual int		Restore(CRestore& restore);
+	static	TYPEDESCRIPTION m_SaveData[];
 };
+
+// jay - new model stuff
+TYPEDESCRIPTION CZombie::m_SaveData[] =
+{
+	DEFINE_FIELD (CZombie, m_iBodyType, FIELD_INTEGER),
+};
+
+IMPLEMENT_SAVERESTORE (CZombie, CBaseMonster);
 
 LINK_ENTITY_TO_CLASS( monster_zombie, CZombie );
 
@@ -104,6 +120,14 @@ const char *CZombie::pPainSounds[] =
 {
 	"zombie/zo_pain1.wav",
 	"zombie/zo_pain2.wav",
+};
+
+// jay - new model stuff
+const char *CZombie::pModels[] =
+{
+	"models/zombie.mdl",
+	"models/zombie_barney.mdl",
+	"models/zombie_soldier.mdl",
 };
 
 //=========================================================
@@ -273,11 +297,26 @@ void CZombie :: Spawn()
 {
 	Precache( );
 
-	// jay - fgd model define
+	// jay - new model stuff
 	if (pev->model)
 		SET_MODEL (ENT (pev), STRING (pev->model));
 	else
-		SET_MODEL (ENT (pev), "models/zombie.mdl");
+	{
+		m_iBodyType = RANDOM_LONG (0, 2);
+
+		switch (m_iBodyType)
+		{
+		case 0:
+			SET_MODEL (ENT (pev), "models/zombie.mdl");
+			break;
+		case 1:
+			SET_MODEL (ENT (pev), "models/zombie_barney.mdl");
+			break;
+		case 2:
+			SET_MODEL (ENT (pev), "models/zombie_soldier.mdl");
+			break;
+		}
+	}
 
 	UTIL_SetSize( pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
 
@@ -300,8 +339,6 @@ void CZombie :: Precache()
 {
 	int i;
 
-	PRECACHE_MODEL("models/zombie.mdl");
-
 	for ( i = 0; i < ARRAYSIZE( pAttackHitSounds ); i++ )
 		PRECACHE_SOUND((char *)pAttackHitSounds[i]);
 
@@ -319,6 +356,10 @@ void CZombie :: Precache()
 
 	for ( i = 0; i < ARRAYSIZE( pPainSounds ); i++ )
 		PRECACHE_SOUND((char *)pPainSounds[i]);
+
+	// jay - new model stuff
+	for ( i = 0; i < ARRAYSIZE( pModels ); i++ )
+		PRECACHE_MODEL((char *)pModels[i]);
 }	
 
 //=========================================================

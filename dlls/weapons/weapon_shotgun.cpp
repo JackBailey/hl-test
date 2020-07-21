@@ -22,10 +22,6 @@
 #include "player.h"
 #include "gamerules.h"
 
-// special deathmatch shotgun spreads
-#define VECTOR_CONE_DM_SHOTGUN	Vector( 0.08716, 0.04362, 0.00  )// 10 degrees by 5 degrees
-#define VECTOR_CONE_DM_DOUBLESHOTGUN Vector( 0.17365, 0.04362, 0.00 ) // 20 degrees by 5 degrees
-
 enum shotgun_e {
 	SHOTGUN_IDLE = 0,
 	SHOTGUN_FIRE,
@@ -61,6 +57,13 @@ public:
 	float m_flNextReload;
 	int m_iShell;
 	float m_flPumpTime;
+
+	// jay - new shell ejection
+	bool m_bFiredAlt;
+	Vector VecShellVelocity;
+	void ItemPostFrame( void );
+	void EjectShells( void );
+	void Holster( void );
 };
 LINK_ENTITY_TO_CLASS( weapon_shotgun, CShotgun );
 
@@ -72,6 +75,7 @@ TYPEDESCRIPTION	CShotgun::m_SaveData[] =
 	DEFINE_FIELD( CShotgun, m_flNextReload, FIELD_TIME ),
 	// DEFINE_FIELD( CShotgun, m_iShell, FIELD_INTEGER ),
 	DEFINE_FIELD( CShotgun, m_flPumpTime, FIELD_TIME ),
+	DEFINE_FIELD( CShotgun, m_bFiredAlt, FIELD_BOOLEAN ),	// jay - new shell ejection
 };
 IMPLEMENT_SAVERESTORE( CShotgun, CBasePlayerWeapon );
 
@@ -103,10 +107,8 @@ void CShotgun::Precache( void )
 	PRECACHE_SOUND ("weapons/sbarrel1.wav");//shotgun
 
 	PRECACHE_SOUND ("weapons/reload1.wav");	// shotgun reload
+	PRECACHE_SOUND ("weapons/reload2.wav");	// jay - unused shotgun reload
 	PRECACHE_SOUND ("weapons/reload3.wav");	// shotgun reload
-
-//	PRECACHE_SOUND ("weapons/sshell1.wav");	// shotgun reload - played on client
-//	PRECACHE_SOUND ("weapons/sshell3.wav");	// shotgun reload - played on client
 	
 	PRECACHE_SOUND ("weapons/357_cock1.wav"); // gun empty sound
 	PRECACHE_SOUND ("weapons/scock1.wav");	// cock gun
@@ -149,6 +151,42 @@ BOOL CShotgun::Deploy( )
 	return DefaultDeploy( "models/v_shotgun.mdl", "models/p_shotgun.mdl", SHOTGUN_DRAW, "shotgun" );
 }
 
+// jay - new shell ejection
+void CShotgun::EjectShells( void )
+{
+	if (!m_bFiredAlt)
+		EjectBrass (m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_up * -12 + gpGlobals->v_forward * 20 + gpGlobals->v_right * 4, 
+					VecShellVelocity, pev->angles.y, m_iShell, TE_BOUNCE_SHOTSHELL);
+	else
+	{
+		EjectBrass (m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_up * -12 + gpGlobals->v_forward * 20 + gpGlobals->v_right * 4, 
+					VecShellVelocity, pev->angles.y, m_iShell, TE_BOUNCE_SHOTSHELL);
+		EjectBrass (m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_up * -12 + gpGlobals->v_forward * 20 + gpGlobals->v_right * 4, 
+					VecShellVelocity, pev->angles.y, m_iShell, TE_BOUNCE_SHOTSHELL);
+		m_bFiredAlt = false;
+	}
+
+	m_flPumpTime = 0;
+}
+
+void CShotgun::ItemPostFrame( void )
+{
+	if (m_flPumpTime && m_flPumpTime < gpGlobals->time)
+		EjectShells();
+
+	CBasePlayerWeapon::ItemPostFrame();	// call vanilla ItemPostFrame as well
+}
+
+void CShotgun::Holster( )
+{
+	if (m_flPumpTime)
+	{
+		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/scock1.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+		EjectShells();
+	}
+
+	CBasePlayerWeapon::Holster();	// call vanilla Holster as well, doesn't *seem* to do anything but do it just in case
+}
 
 void CShotgun::PrimaryAttack()
 {
@@ -181,29 +219,18 @@ void CShotgun::PrimaryAttack()
 
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 
-	Vector	vecShellVelocity = m_pPlayer->pev->velocity 
-							 + gpGlobals->v_right * RANDOM_FLOAT(50,70) 
-							 + gpGlobals->v_up * RANDOM_FLOAT(100,150) 
-							 + gpGlobals->v_forward * 25;
-
-	EjectBrass ( m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_up * -12 + gpGlobals->v_forward * 20 + gpGlobals->v_right * 4 , vecShellVelocity, pev->angles.y, m_iShell, TE_BOUNCE_SHOTSHELL); 
+	VecShellVelocity = m_pPlayer->pev->velocity 
+					 + gpGlobals->v_right * RANDOM_FLOAT(50,70) 
+					 + gpGlobals->v_up * RANDOM_FLOAT(100,150) 
+					 + gpGlobals->v_forward * 25;
 
 	EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/sbarrel1.wav", RANDOM_FLOAT(0.95, 1.0), ATTN_NORM, 0, 93 + RANDOM_LONG(0,0x1f));
 	
 
 	Vector vecSrc	 = m_pPlayer->GetGunPosition( );
 	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
-
-	if ( g_pGameRules->IsDeathmatch() )
-	{
-		// altered deathmatch spread
-		m_pPlayer->FireBullets( 4, vecSrc, vecAiming, VECTOR_CONE_DM_SHOTGUN, 2048, BULLET_PLAYER_BUCKSHOT, 0 );
-	}
-	else
-	{
-		// regular old, untouched spread. 
-		m_pPlayer->FireBullets( 6, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 2048, BULLET_PLAYER_BUCKSHOT, 0 );
-	}
+ 
+	m_pPlayer->FireBullets( 6, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 2048, BULLET_PLAYER_BUCKSHOT, 0 );	// jay - always use singleplayer spread
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		// HEV suit - indicate out of ammo condition
@@ -212,12 +239,12 @@ void CShotgun::PrimaryAttack()
 	if (m_iClip != 0)
 		m_flPumpTime = gpGlobals->time + 0.5;
 
-	m_flNextPrimaryAttack = gpGlobals->time + 0.75;
-	m_flNextSecondaryAttack = gpGlobals->time + 0.75;
+	m_flNextPrimaryAttack = gpGlobals->time + 1;	// jay - changed delay from 0.75
+	m_flNextSecondaryAttack = gpGlobals->time + 1;	// jay - changed delay from 0.75
 	if (m_iClip != 0)
 		m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	else
-		m_flTimeWeaponIdle = 0.75;
+		m_flTimeWeaponIdle = 1;	// jay - changed delay from 0.75
 	m_fInReload = 0;
 
 	m_pPlayer->pev->punchangle.x -= 5;
@@ -255,33 +282,19 @@ void CShotgun::SecondaryAttack( void )
 
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 		
-	Vector vecShellVelocity = m_pPlayer->pev->velocity 
-							+ gpGlobals->v_right * RANDOM_FLOAT(50,70) 
-							+ gpGlobals->v_up * RANDOM_FLOAT(100,150) 
-							+ gpGlobals->v_forward * 25;
-	EjectBrass ( m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_up * -12 + gpGlobals->v_forward * 20 + gpGlobals->v_right * 4 , vecShellVelocity, pev->angles.y, m_iShell, TE_BOUNCE_SHOTSHELL); 
-	vecShellVelocity		= m_pPlayer->pev->velocity 
-							+ gpGlobals->v_right * RANDOM_FLOAT(50,70) 
-							+ gpGlobals->v_up * RANDOM_FLOAT(100,150) 
-							+ gpGlobals->v_forward * 25;
-	EjectBrass ( m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_up * -12 + gpGlobals->v_forward * 20 + gpGlobals->v_right * 4 , vecShellVelocity, pev->angles.y, m_iShell, TE_BOUNCE_SHOTSHELL); 
+	VecShellVelocity = m_pPlayer->pev->velocity 
+					 + gpGlobals->v_right * RANDOM_FLOAT(50,70) 
+					 + gpGlobals->v_up * RANDOM_FLOAT(100,150) 
+					 + gpGlobals->v_forward * 25;
+
+	m_bFiredAlt = true;	// jay - new shell ejection
 
 	EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/dbarrel1.wav", RANDOM_FLOAT(0.98, 1.0), ATTN_NORM, 0, 85 + RANDOM_LONG(0,0x1f));
 	
 	Vector vecSrc	 = m_pPlayer->GetGunPosition( );
 	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 	
-	if ( g_pGameRules->IsDeathmatch() )
-	{
-		// tuned for deathmatch
-		m_pPlayer->FireBullets( 8, vecSrc, vecAiming, VECTOR_CONE_DM_DOUBLESHOTGUN, 2048, BULLET_PLAYER_BUCKSHOT, 0 );
-	}
-	else
-	{
-		// untouched default single player
-		m_pPlayer->FireBullets( 12, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 2048, BULLET_PLAYER_BUCKSHOT, 0 );
-	}
-
+	m_pPlayer->FireBullets( 12, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 2048, BULLET_PLAYER_BUCKSHOT, 0 );	// jay - always use singleplayer spread
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		// HEV suit - indicate out of ammo condition
@@ -290,12 +303,12 @@ void CShotgun::SecondaryAttack( void )
 	if (m_iClip != 0)
 		m_flPumpTime = gpGlobals->time + 0.95;
 
-	m_flNextPrimaryAttack = gpGlobals->time + 1.5;
-	m_flNextSecondaryAttack = gpGlobals->time + 1.5;
+	m_flNextPrimaryAttack = gpGlobals->time + 1.6;	// jay - changed delay from 1.5
+	m_flNextSecondaryAttack = gpGlobals->time + 1.6;	// jay - changed delay from 1.5
 	if (m_iClip != 0)
 		m_flTimeWeaponIdle = gpGlobals->time + 6.0;
 	else
-		m_flTimeWeaponIdle = 1.5;
+		m_flTimeWeaponIdle = 1.6;	// jay - changed delay from 1.5
 
 	m_fInReload = 0;
 
@@ -320,10 +333,10 @@ void CShotgun::Reload( void )
 	{
 		SendWeaponAnim( SHOTGUN_START_RELOAD );
 		m_fInReload = 1;
-		m_pPlayer->m_flNextAttack = gpGlobals->time + 0.6;
-		m_flTimeWeaponIdle = gpGlobals->time + 0.6;
-		m_flNextPrimaryAttack = gpGlobals->time + 1.0;
-		m_flNextSecondaryAttack = gpGlobals->time + 1.0;
+		m_pPlayer->m_flNextAttack = gpGlobals->time + 0.75;	// jay - changed delay from 0.6
+		m_flTimeWeaponIdle = gpGlobals->time + 0.75;	// jay - changed delay from 0.6
+		m_flNextPrimaryAttack = gpGlobals->time + 0.75;	// jay - changed delay from 1
+		m_flNextSecondaryAttack = gpGlobals->time + 0.75;	// jay - changed delay from 1
 		return;
 	}
 	else if (m_fInReload == 1)
@@ -333,10 +346,18 @@ void CShotgun::Reload( void )
 		// was waiting for gun to move to side
 		m_fInReload = 2;
 
-		if (RANDOM_LONG(0,1))
-			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/reload1.wav", 1, ATTN_NORM, 0, 85 + RANDOM_LONG(0,0x1f));
-		else
-			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/reload3.wav", 1, ATTN_NORM, 0, 85 + RANDOM_LONG(0,0x1f));
+		switch (RANDOM_LONG (0, 2))
+		{
+		case 0:
+			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/reload1.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+			break;
+		case 1:
+			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/reload2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+			break;
+		case 2:
+			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/reload3.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+			break;
+		}
 
 		SendWeaponAnim( SHOTGUN_RELOAD );
 
@@ -359,13 +380,6 @@ void CShotgun::WeaponIdle( void )
 
 	m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 
-	if (m_flPumpTime && m_flPumpTime < gpGlobals->time)
-	{
-		// play pumping sound
-		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/scock1.wav", 1, ATTN_NORM, 0, 95 + RANDOM_LONG(0,0x1f));
-		m_flPumpTime = 0;
-	}
-
 	if (m_flTimeWeaponIdle < gpGlobals->time)
 	{
 		if (m_iClip == 0 && m_fInReload == 0 && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
@@ -382,33 +396,28 @@ void CShotgun::WeaponIdle( void )
 			{
 				// reload debounce has timed out
 				SendWeaponAnim( SHOTGUN_PUMP );
-				
-				// play cocking sound
-				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/scock1.wav", 1, ATTN_NORM, 0, 95 + RANDOM_LONG(0,0x1f));
 				m_fInReload = 0;
-				m_flTimeWeaponIdle = gpGlobals->time + 1.5;
+				m_flTimeWeaponIdle = gpGlobals->time + 1;	// jay - changed delay from 1.5
 			}
 		}
 		else
 		{
-			int iAnim;
-			float flRand = RANDOM_FLOAT(0, 1);
-			if (flRand <= 0.8)
+			// jay - new idle anim handling; a switch removes the need for iAnim and flRand
+			switch (RANDOM_LONG (0, 2))
 			{
-				iAnim = SHOTGUN_IDLE_DEEP;
-				m_flTimeWeaponIdle = gpGlobals->time + (60.0/12.0);// * RANDOM_LONG(2, 5);
-			}
-			else if (flRand <= 0.95)
-			{
-				iAnim = SHOTGUN_IDLE;
+			case 0:
 				m_flTimeWeaponIdle = gpGlobals->time + (20.0/9.0);
-			}
-			else
-			{
-				iAnim = SHOTGUN_IDLE4;
+				SendWeaponAnim( SHOTGUN_IDLE );
+				break;
+			case 1:
 				m_flTimeWeaponIdle = gpGlobals->time + (20.0/9.0);
+				SendWeaponAnim( SHOTGUN_IDLE4 );
+				break;
+			case 2:
+				m_flTimeWeaponIdle = gpGlobals->time + (60.0/12.0);
+				SendWeaponAnim( SHOTGUN_IDLE_DEEP );
+				break;
 			}
-			SendWeaponAnim( iAnim );
 		}
 	}
 }

@@ -26,6 +26,8 @@
 #define	CROWBAR_BODYHIT_VOLUME 128
 #define	CROWBAR_WALLHIT_VOLUME 512
 
+#define	CROWBAR_VIEWPUNCH 3	// jay - crowbar viewpunch
+
 class CCrowbar : public CBasePlayerWeapon
 {
 public:
@@ -160,6 +162,8 @@ void FindHullIntersection( const Vector &vecSrc, TraceResult &tr, float *mins, f
 
 void CCrowbar::PrimaryAttack()
 {
+	m_pPlayer->pev->punchangle.x += CROWBAR_VIEWPUNCH;	// jay - crowbar viewpunch
+
 	if (! Swing( 1 ))
 	{
 		SetThink(&CCrowbar::SwingAgain );
@@ -235,7 +239,7 @@ int CCrowbar::Swing( int fFirst )
 
 		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
 
-		switch( ((m_iSwing++) % 2) + 1 )
+		switch( (m_iSwing++) % 3 )	// jay - og was ((m_iSwing++) % 2) + 1
 		{
 		case 0:
 			SendWeaponAnim( CROWBAR_ATTACK1HIT ); break;
@@ -249,16 +253,7 @@ int CCrowbar::Swing( int fFirst )
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
 		ClearMultiDamage( );
-		if ( (m_flNextPrimaryAttack + 1 < gpGlobals->time) || g_pGameRules->IsMultiplayer() )
-		{
-			// first swing does full damage
-			pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgCrowbar, gpGlobals->v_forward, &tr, DMG_CLUB ); 
-		}
-		else
-		{
-			// subsequent swings do half
-			pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgCrowbar / 2, gpGlobals->v_forward, &tr, DMG_CLUB ); 
-		}	
+		pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgCrowbar, gpGlobals->v_forward, &tr, DMG_CLUB );	// jay - always do full damage
 		ApplyMultiDamage( m_pPlayer->pev, m_pPlayer->pev );
 
 		m_flNextPrimaryAttack = gpGlobals->time + 0.25;
@@ -310,11 +305,9 @@ int CCrowbar::Swing( int fFirst )
 			switch( RANDOM_LONG(0,1) )
 			{
 			case 0:
-				//UTIL_EmitAmbientSound(ENT(0), ptr->vecEndPos, "weapons/cbar_hit1.wav", fvolbar, ATTN_NORM, 0, 98 + RANDOM_LONG(0,3));
 				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hit1.wav", fvolbar, ATTN_NORM, 0, 98 + RANDOM_LONG(0,3)); 
 				break;
 			case 1:
-				//UTIL_EmitAmbientSound(ENT(0), ptr->vecEndPos, "weapons/cbar_hit2.wav", fvolbar, ATTN_NORM, 0, 98 + RANDOM_LONG(0,3));
 				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hit2.wav", fvolbar, ATTN_NORM, 0, 98 + RANDOM_LONG(0,3)); 
 				break;
 			}

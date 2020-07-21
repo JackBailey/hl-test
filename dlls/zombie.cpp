@@ -58,27 +58,13 @@ public:
 	static const char *pAttackHitSounds[];
 	static const char *pAttackMissSounds[];
 
-	// jay - new model stuff
-	static const char *pModels[];
-	int m_iBodyType;
+	static const char *pModels[];	// jay - new model stuff
 
 	// No range attacks
 	BOOL CheckRangeAttack1 ( float flDot, float flDist ) { return FALSE; }
 	BOOL CheckRangeAttack2 ( float flDot, float flDist ) { return FALSE; }
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
-
-	virtual int		Save(CSave& save);
-	virtual int		Restore(CRestore& restore);
-	static	TYPEDESCRIPTION m_SaveData[];
 };
-
-// jay - new model stuff
-TYPEDESCRIPTION CZombie::m_SaveData[] =
-{
-	DEFINE_FIELD (CZombie, m_iBodyType, FIELD_INTEGER),
-};
-
-IMPLEMENT_SAVERESTORE (CZombie, CBaseMonster);
 
 LINK_ENTITY_TO_CLASS( monster_zombie, CZombie );
 
@@ -298,13 +284,13 @@ void CZombie :: Spawn()
 	Precache( );
 
 	// jay - new model stuff
+	// if a specific model is defined by the map, then use said model
+	// otherwise, randomize between scientist, barney, or soldier
 	if (pev->model)
 		SET_MODEL (ENT (pev), STRING (pev->model));
 	else
 	{
-		m_iBodyType = RANDOM_LONG (0, 2);
-
-		switch (m_iBodyType)
+		switch (RANDOM_LONG (0, 2))
 		{
 		case 0:
 			SET_MODEL (ENT (pev), "models/zombie.mdl");

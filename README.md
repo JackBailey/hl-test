@@ -4,14 +4,21 @@ HL1 Mod Testing Environment
 This repository serves as a main hub of sorts for any of my Half-Life mods. I'll be using this code as a base for all my future mods, and decided that it'd be nice to release it, since I try to fix any bugs in the vanilla code I can find, as well as add features that I personally think might be useful for general modding purposes.
 
 You're free to pick out any code snippets you want and use them in whatever way you want to. Credit would be nice, but isn't required in this case.
+
 However, if you choose to use this base in it's entirety, then you have to credit me, as well as have the source code for the mod that uses it publicly available.
 
-Here's a list of people who've helped me out with this thing in one way or another:
+Credits & Special Thanks
+======================
 James - An absolute shit-ton of help. He taught me almost everything I know about HL1 modding. Oh, yeah, he also gave me code for some of the minor minor changes in this mod.
+
 The Spirit of Half-Life Team - Code snippet for customizable model scaling
+
 Jane - Motivating me to make stuff
+
 Charlie M. - Being an asshole and annoying the shit outta me on Discord while I was trying to work
+
 Ethan - Being an awesome friend and helping me out a lot
+
 Sam H. - Being there when I needed him the most. I love you.
 
 

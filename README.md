@@ -45,9 +45,11 @@ Shotgun:
 
 Credits & Special Thanks
 ======================
-James - An absolute shit-ton of help. He taught me almost everything I know about HL1 modding. Oh, yeah, he also gave me code for some of the minor minor changes in this mod.
+James - An absolute shit-ton of help. He taught me almost everything I know about HL1 modding. Oh, yeah, he also gave me code for some of the minor changes in this mod.
 
 The Spirit of Half-Life Team - Code snippet for customizable model scaling
+
+Magic Nipples - HAssault code (from his Monster Files series)
 
 ZooL - Raw mouse input fix (from Half-Nuked)
 
@@ -55,7 +57,7 @@ Jane - Motivating me to make stuff
 
 Charlie M. - Being an asshole and annoying the shit outta me on Discord while I was trying to work
 
-Ethan - Being an awesome friend and helping me out a lot
+Sayok & Programme - Being awesome friends and helping me out a lot
 
 Sam H. - Being there when I needed him the most. I love you.
 

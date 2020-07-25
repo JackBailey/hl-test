@@ -361,7 +361,7 @@ void CBarney :: BarneyFirePistol ( void )
 		pitchShift = 0;
 	else
 		pitchShift -= 5;
-	EMIT_SOUND_DYN( ENT(pev), CHAN_WEAPON, "barney/ba_attack2.wav", 1, ATTN_NORM, 0, 100 + pitchShift );
+	EMIT_SOUND_DYN( ENT(pev), CHAN_WEAPON, "weapons/pl_gun3.wav", 1, ATTN_NORM, 0, 100 + pitchShift );
 
 	CSoundEnt::InsertSound ( bits_SOUND_COMBAT, pev->origin, 384, 0.3 );
 
@@ -435,7 +435,7 @@ void CBarney :: Precache()
 	PRECACHE_MODEL("models/barney.mdl");
 
 	PRECACHE_SOUND("barney/ba_attack1.wav" );
-	PRECACHE_SOUND("barney/ba_attack2.wav" );
+	PRECACHE_SOUND("weapons/pl_gun3.wav" );
 
 	PRECACHE_SOUND("barney/ba_pain1.wav");
 	PRECACHE_SOUND("barney/ba_pain2.wav");

@@ -113,7 +113,7 @@ void CShotgun::Precache( void )
 	PRECACHE_SOUND ("weapons/reload3.wav");	// shotgun reload
 	
 	PRECACHE_SOUND ("weapons/357_cock1.wav"); // gun empty sound
-	PRECACHE_SOUND ("weapons/scock1.wav");	// cock gun
+	PRECACHE_SOUND ("weapons/foley/sg_pump.wav");	// cock gun
 }
 
 int CShotgun::AddToPlayer( CBasePlayer *pPlayer )
@@ -183,7 +183,7 @@ void CShotgun::Holster( )
 {
 	if (m_flPumpTime)
 	{
-		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/scock1.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/foley/sg_pump.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
 		EjectShells();
 	}
 

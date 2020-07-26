@@ -273,50 +273,6 @@ Vector VecVelocityForDamage(float flDamage)
 	return vec;
 }
 
-#if 0 /*
-static void ThrowGib(entvars_t *pev, char *szGibModel, float flDamage)
-{
-	edict_t *pentNew = CREATE_ENTITY();
-	entvars_t *pevNew = VARS(pentNew);
-
-	pevNew->origin = pev->origin;
-	SET_MODEL(ENT(pevNew), szGibModel);
-	UTIL_SetSize(pevNew, g_vecZero, g_vecZero);
-
-	pevNew->velocity		= VecVelocityForDamage(flDamage);
-	pevNew->movetype		= MOVETYPE_BOUNCE;
-	pevNew->solid			= SOLID_NOT;
-	pevNew->avelocity.x		= RANDOM_FLOAT(0,600);
-	pevNew->avelocity.y		= RANDOM_FLOAT(0,600);
-	pevNew->avelocity.z		= RANDOM_FLOAT(0,600);
-	CHANGE_METHOD(ENT(pevNew), em_think, SUB_Remove);
-	pevNew->ltime		= gpGlobals->time;
-	pevNew->nextthink	= gpGlobals->time + RANDOM_FLOAT(10,20);
-	pevNew->frame		= 0;
-	pevNew->flags		= 0;
-}
-	
-	
-static void ThrowHead(entvars_t *pev, char *szGibModel, floatflDamage)
-{
-	SET_MODEL(ENT(pev), szGibModel);
-	pev->frame			= 0;
-	pev->nextthink		= -1;
-	pev->movetype		= MOVETYPE_BOUNCE;
-	pev->takedamage		= DAMAGE_NO;
-	pev->solid			= SOLID_NOT;
-	pev->view_ofs		= Vector(0,0,8);
-	UTIL_SetSize(pev, Vector(-16,-16,0), Vector(16,16,56));
-	pev->velocity		= VecVelocityForDamage(flDamage);
-	pev->avelocity		= RANDOM_FLOAT(-1,1) * Vector(0,600,0);
-	pev->origin.z -= 24;
-	ClearBits(pev->flags, FL_ONGROUND);
-}
-
-
-*/ 
-#endif
-
 int TrainSpeed(int iSpeed, int iMax)
 {
 	float fSpeed, fMax;
@@ -343,15 +299,6 @@ int TrainSpeed(int iSpeed, int iMax)
 
 void CBasePlayer :: DeathSound( void )
 {
-	// water death sounds
-	/*
-	if (pev->waterlevel == 3)
-	{
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/h2odeath.wav", 1, ATTN_NONE);
-		return;
-	}
-	*/
-
 	// temporarily using pain sounds for death sounds
 	switch (RANDOM_LONG(1,5)) 
 	{
@@ -381,8 +328,6 @@ int CBasePlayer :: TakeHealth( float flHealth, int bitsDamageType )
 
 Vector CBasePlayer :: GetGunPosition( )
 {
-//	UTIL_MakeVectors(pev->v_angle);
-//	m_HackedGunPos = pev->view_ofs;
 	Vector origin;
 	
 	origin = pev->origin + pev->view_ofs;
@@ -529,6 +474,31 @@ int CBasePlayer :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 	ftrivial = (pev->health > 75 || m_lastDamageAmount < 5);
 	fmajor = (m_lastDamageAmount > 25);
 	fcritical = (pev->health < 30);
+
+	// jay - pain flash
+	int iPainEnabled = (int)CVAR_GET_FLOAT( "cl_painflash" );
+	float flPainIntensity = CVAR_GET_FLOAT( "cl_painflash_intensity" );
+	int iPainBrightness = (int)CVAR_GET_FLOAT( "cl_painflash_brightness" );
+
+	if( iPainEnabled )
+	{
+		// clamp this, just in case
+		if( iPainBrightness > 255 )
+			iPainBrightness = 255;
+		if( iPainBrightness < 0 )
+			iPainBrightness = 0;
+
+		float flPainAlpha;
+
+		flPainAlpha = ( flDamage * 5 ) * flPainIntensity;
+		if( flPainAlpha > 255 )
+			flPainAlpha = 255;
+
+		if( IsAlive() )
+		{
+			UTIL_ScreenFadeAll( Vector( iPainBrightness, 0, 0 ), 0.25, 0, flPainAlpha, FFADE_IN );
+		}
+	}
 
 	// handle all bits set in this damage message,
 	// let the suit give player the diagnosis
@@ -890,6 +860,17 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 	}
 
 	SetAnimation( PLAYER_DIE );
+
+	// jay - death screenfade
+	int iPainBrightness = (int)CVAR_GET_FLOAT( "cl_painflash_brightness" );
+
+	// clamp this, just in case
+	if( iPainBrightness > 255 )
+		iPainBrightness = 255;
+	if( iPainBrightness < 0 )
+		iPainBrightness = 0;
+
+	UTIL_ScreenFadeAll( Vector( iPainBrightness, 0, 0 ), 6, 15, 255, FFADE_OUT | FFADE_STAYOUT );
 	
 	m_iRespawnFrames = 0;
 
@@ -2623,7 +2604,7 @@ void CBasePlayer::PostThink()
 			if ( flFallDamage > 0 )
 			{
 				TakeDamage(VARS(eoNullEntity), VARS(eoNullEntity), flFallDamage, DMG_FALL ); 
-				pev->punchangle.x = 0;
+				// pev->punchangle.x = 0;
 			}
 		}
 
@@ -2660,70 +2641,6 @@ void CBasePlayer::PostThink()
 	UpdatePlayerSound();
 
 pt_end:
-#if defined( CLIENT_WEAPONS )
-		// Decay timers on weapons
-	// go through all of the weapons and make a list of the ones to pack
-	for ( int i = 0 ; i < MAX_ITEM_TYPES ; i++ )
-	{
-		if ( m_rgpPlayerItems[ i ] )
-		{
-			CBasePlayerItem *pPlayerItem = m_rgpPlayerItems[ i ];
-
-			while ( pPlayerItem )
-			{
-				CBasePlayerWeapon *gun;
-
-				gun = (CBasePlayerWeapon *)pPlayerItem->GetWeaponPtr();
-				
-				if ( gun && gun->UseDecrement() )
-				{
-					gun->m_flNextPrimaryAttack		= max( gun->m_flNextPrimaryAttack - gpGlobals->frametime, -1.0 );
-					gun->m_flNextSecondaryAttack	= max( gun->m_flNextSecondaryAttack - gpGlobals->frametime, -0.001 );
-
-					if ( gun->m_flTimeWeaponIdle != 1000 )
-					{
-						gun->m_flTimeWeaponIdle		= max( gun->m_flTimeWeaponIdle - gpGlobals->frametime, -0.001 );
-					}
-
-					if ( gun->pev->fuser1 != 1000 )
-					{
-						gun->pev->fuser1	= max( gun->pev->fuser1 - gpGlobals->frametime, -0.001 );
-					}
-
-					// Only decrement if not flagged as NO_DECREMENT
-//					if ( gun->m_flPumpTime != 1000 )
-				//	{
-				//		gun->m_flPumpTime	= max( gun->m_flPumpTime - gpGlobals->frametime, -0.001 );
-				//	}
-					
-				}
-
-				pPlayerItem = pPlayerItem->m_pNext;
-			}
-		}
-	}
-
-	m_flNextAttack -= gpGlobals->frametime;
-	if ( m_flNextAttack < -0.001 )
-		m_flNextAttack = -0.001;
-	
-	if ( m_flNextAmmoBurn != 1000 )
-	{
-		m_flNextAmmoBurn -= gpGlobals->frametime;
-		
-		if ( m_flNextAmmoBurn < -0.001 )
-			m_flNextAmmoBurn = -0.001;
-	}
-
-	if ( m_flAmmoStartCharge != 1000 )
-	{
-		m_flAmmoStartCharge -= gpGlobals->frametime;
-		
-		if ( m_flAmmoStartCharge < -0.001 )
-			m_flAmmoStartCharge = -0.001;
-	}
-#endif
-
 	// Track button info so we can detect 'pressed' and 'released' buttons next frame
 	m_afButtonLast = pev->button;
 }
@@ -3058,13 +2975,6 @@ int CBasePlayer::Restore( CRestore &restore )
 	}
 
 	RenewItems();
-
-#if defined( CLIENT_WEAPONS )
-	// HACK:	This variable is saved/restored in CBaseMonster as a time variable, but we're using it
-	//			as just a counter.  Ideally, this needs its own variable that's saved as a plain float.
-	//			Barring that, we clear it out here instead of using the incorrect restored time value.
-	m_flNextAttack = UTIL_WeaponTimeBase();
-#endif
 
 	return status;
 }
@@ -3847,11 +3757,7 @@ Called every frame by the player PreThink
 */
 void CBasePlayer::ItemPreFrame()
 {
-#if defined( CLIENT_WEAPONS )
-    if ( m_flNextAttack > 0 )
-#else
     if ( gpGlobals->time < m_flNextAttack )
-#endif
 	{
 		return;
 	}

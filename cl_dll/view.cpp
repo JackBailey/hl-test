@@ -95,6 +95,14 @@ cvar_t	*cl_chasedist;
 cvar_t	*cl_rollspeed;
 cvar_t	*cl_rollangle;
 
+// jay - pain flash cvars
+cvar_t	*cl_painflash;
+cvar_t	*cl_painflash_intensity;
+cvar_t	*cl_painflash_brightness;
+
+// jay - blood type
+cvar_t	*cl_bloodtype;
+
 // These cvars are not registered (so users can't cheat), so set the ->value field directly
 // Register these cvars in V_Init() if needed for easy tweaking
 cvar_t	v_iyaw_cycle		= {"v_iyaw_cycle", "2", 0, 2};
@@ -105,64 +113,6 @@ cvar_t	v_iroll_level		= {"v_iroll_level", "0.1", 0, 0.1};
 cvar_t	v_ipitch_level		= {"v_ipitch_level", "0.3", 0, 0.3};
 
 float	v_idlescale;  // used by TFC for concussion grenade effect
-
-//=============================================================================
-/*
-void V_NormalizeAngles( float *angles )
-{
-	int i;
-	// Normalize angles
-	for ( i = 0; i < 3; i++ )
-	{
-		if ( angles[i] > 180.0 )
-		{
-			angles[i] -= 360.0;
-		}
-		else if ( angles[i] < -180.0 )
-		{
-			angles[i] += 360.0;
-		}
-	}
-}
-
-/*
-===================
-V_InterpolateAngles
-
-Interpolate Euler angles.
-FIXME:  Use Quaternions to avoid discontinuities
-Frac is 0.0 to 1.0 ( i.e., should probably be clamped, but doesn't have to be )
-===================
-
-void V_InterpolateAngles( float *start, float *end, float *output, float frac )
-{
-	int i;
-	float ang1, ang2;
-	float d;
-	
-	V_NormalizeAngles( start );
-	V_NormalizeAngles( end );
-
-	for ( i = 0 ; i < 3 ; i++ )
-	{
-		ang1 = start[i];
-		ang2 = end[i];
-
-		d = ang2 - ang1;
-		if ( d > 180 )
-		{
-			d -= 360;
-		}
-		else if ( d < -180 )
-		{	
-			d += 360;
-		}
-
-		output[i] = ang1 + d * frac;
-	}
-
-	V_NormalizeAngles( output );
-} */
 
 // Quakeworld bob code, this fixes jitters in the mutliplayer since the clock (pparams->time) isn't quite linear
 float V_CalcBob ( struct ref_params_s *pparams )
@@ -1719,89 +1669,14 @@ void V_Init (void)
 	cl_chasedist		= gEngfuncs.pfnRegisterVariable( "cl_chasedist","112", 0 );
 
 	// magic nipples - old viewroll
-	cl_rollangle		= gEngfuncs.pfnRegisterVariable( "cl_rollangle", "1", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
-	cl_rollspeed		= gEngfuncs.pfnRegisterVariable( "cl_rollspeed", "325", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
+	cl_rollangle		= gEngfuncs.pfnRegisterVariable( "cl_rollangle", "2", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
+	cl_rollspeed		= gEngfuncs.pfnRegisterVariable( "cl_rollspeed", "325", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
+
+	// jay - pain flash cvars
+	cl_painflash			= gEngfuncs.pfnRegisterVariable( "cl_painflash", "1", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
+	cl_painflash_intensity	= gEngfuncs.pfnRegisterVariable( "cl_painflash_intensity", "2", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
+	cl_painflash_brightness	= gEngfuncs.pfnRegisterVariable( "cl_painflash_brightness", "192", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
+
+	// jay - blood type
+	cl_bloodtype		= gEngfuncs.pfnRegisterVariable( "cl_bloodtype", "2", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
 }
-
-
-//#define TRACE_TEST
-#if defined( TRACE_TEST )
-
-extern float in_fov;
-/*
-====================
-CalcFov
-====================
-*/
-float CalcFov (float fov_x, float width, float height)
-{
-	float	a;
-	float	x;
-
-	if (fov_x < 1 || fov_x > 179)
-		fov_x = 90;	// error, set to 90
-
-	x = width/tan(fov_x/360*M_PI);
-
-	a = atan (height/x);
-
-	a = a*360/M_PI;
-
-	return a;
-}
-
-int hitent = -1;
-
-void V_Move( int mx, int my )
-{
-	float fov;
-	float fx, fy;
-	float dx, dy;
-	float c_x, c_y;
-	float dX, dY;
-	vec3_t forward, up, right;
-	vec3_t newangles;
-
-	vec3_t farpoint;
-	pmtrace_t tr;
-
-	fov = CalcFov( in_fov, (float)ScreenWidth, (float)ScreenHeight );
-
-	c_x = (float)ScreenWidth / 2.0;
-	c_y = (float)ScreenHeight / 2.0;
-
-	dx = (float)mx - c_x;
-	dy = (float)my - c_y;
-
-	// Proportion we moved in each direction
-	fx = dx / c_x;
-	fy = dy / c_y;
-
-	dX = fx * in_fov / 2.0 ;
-	dY = fy * fov / 2.0;
-
-	newangles = v_angles;
-
-	newangles[ YAW ] -= dX;
-	newangles[ PITCH ] += dY;
-
-	// Now rotate v_forward around that point
-	AngleVectors ( newangles, forward, right, up );
-
-	farpoint = v_origin + 8192 * forward;
-
-	// Trace
-	tr = *(gEngfuncs.PM_TraceLine( (float *)&v_origin, (float *)&farpoint, PM_TRACELINE_PHYSENTSONLY, 2 /*point sized hull*/, -1 ));
-
-	if ( tr.fraction != 1.0 && tr.ent != 0 )
-	{
-		hitent = PM_GetPhysEntInfo( tr.ent );
-		PM_ParticleLine( (float *)&v_origin, (float *)&tr.endpos, 5, 1.0, 0.0 );
-	}
-	else
-	{
-		hitent = -1;
-	}
-}
-
-#endif

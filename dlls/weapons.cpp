@@ -137,6 +137,15 @@ void AddMultiDamage( entvars_t *pevInflictor, CBaseEntity *pEntity, float flDama
 	gMultiDamage.amount += flDamage;
 }
 
+// jay - new blood effect stuff
+void SpawnBloodStream( Vector vecSpot, int bloodColor )
+{
+	if (bloodColor == BLOOD_COLOR_GREEN)
+		UTIL_BloodStream( vecSpot, -g_vecAttackDir, bloodColor, 200);	// og dir was g_vecAttackDir (towards attacker)
+	else
+		UTIL_BloodStream( vecSpot, -g_vecAttackDir, (unsigned short)73, 200);	// og dir was g_vecAttackDir (towards attacker)
+}
+
 /*
 ================
 SpawnBlood
@@ -144,13 +153,21 @@ SpawnBlood
 */
 void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage)
 {
-	//UTIL_BloodDrips( vecSpot, g_vecAttackDir, bloodColor, (int)flDamage );
-
-	// jay - replace blood splats with streams
-	if (bloodColor == BLOOD_COLOR_GREEN)
-		UTIL_BloodStream( vecSpot, -g_vecAttackDir, bloodColor, 200);	// og dir was g_vecAttackDir (towards attacker)
-	else
-		UTIL_BloodStream( vecSpot, -g_vecAttackDir, (unsigned short)73, 200);	// og dir was g_vecAttackDir (towards attacker)
+	// jay - allow player to change the blood effect style
+	switch( (int)CVAR_GET_FLOAT( "cl_bloodtype" ) )
+	{
+	default:
+	case 0:	// vanilla
+		UTIL_BloodDrips( vecSpot, g_vecAttackDir, bloodColor, (int)flDamage );
+		break;
+	case 1:	// streams
+		SpawnBloodStream( vecSpot, bloodColor );
+		break;
+	case 2:	// both
+		UTIL_BloodDrips( vecSpot, g_vecAttackDir, bloodColor, (int)flDamage );
+		SpawnBloodStream( vecSpot, bloodColor );
+		break;
+	}
 }
 
 
@@ -632,11 +649,7 @@ void CBasePlayerItem::DefaultTouch( CBaseEntity *pOther )
 
 BOOL CanAttack( float attack_time, float curtime, BOOL isPredicted )
 {
-#if defined( CLIENT_WEAPONS )
-	if ( !isPredicted )
-#else
 	if ( 1 )
-#endif
 	{
 		return ( attack_time <= curtime ) ? TRUE : FALSE;
 	}
@@ -877,11 +890,6 @@ void CBasePlayerWeapon::SendWeaponAnim( int iAnim, int skiplocal, int body )
 		skiplocal = 0;
 
 	m_pPlayer->pev->weaponanim = iAnim;
-
-#if defined( CLIENT_WEAPONS )
-	if ( skiplocal && ENGINE_CANSKIP( m_pPlayer->edict() ) )
-		return;
-#endif
 
 	MESSAGE_BEGIN( MSG_ONE, SVC_WEAPONANIM, NULL, m_pPlayer->pev );
 		WRITE_BYTE( iAnim );						// sequence number

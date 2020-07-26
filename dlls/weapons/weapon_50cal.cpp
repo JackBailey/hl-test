@@ -26,7 +26,7 @@ enum _50cal_e
 	_50CAL_FIRE
 };
 
-#define	FIRE_DELAY	0.1;
+#define	FIRE_DELAY	0.15;
 
 
 class C50cal : public CBasePlayerWeapon
@@ -179,7 +179,7 @@ void C50cal::PrimaryAttack()
 	Vector vecSrc	 = m_pPlayer->GetGunPosition( );
 	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 	
-	m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, VECTOR_CONE_3DEGREES, 8192, BULLET_PLAYER_50CAL, 1 );
+	m_pPlayer->FireBullets( 1, vecSrc, vecAiming, VECTOR_CONE_3DEGREES, 8192, BULLET_PLAYER_50CAL, 1 );
 
 	if ( !HasAmmo() )
 		// HEV suit - indicate out of ammo condition

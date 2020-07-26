@@ -19,6 +19,8 @@
 #define WRENCH_BODYHIT_VOLUME	512
 #define WRENCH_WALLHIT_VOLUME	128
 
+#define	WRENCH_DELAY	0.75
+
 
 enum wrench_e
 {
@@ -57,8 +59,6 @@ public:
 
 	int m_iSwing;
 	TraceResult m_trHit;
-
-	bool m_bIsAlt;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_wrench, CWrench );
@@ -214,38 +214,27 @@ BOOL CWrench::Swing( bool bFirst )
 		if (bFirst)
 		{
 			// miss
-			if( m_bIsAlt )
+			switch( (m_iSwing++) % 3 )
 			{
-				SendWeaponAnim( WRENCH_ALT_MISS );
-				m_flNextPrimaryAttack = gpGlobals->time + 1;
-				m_flNextSecondaryAttack = gpGlobals->time + 1;
-
-				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_big_miss.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+			case 0:
+				SendWeaponAnim( WRENCH_ATTACK1MISS ); break;
+			case 1:
+				SendWeaponAnim( WRENCH_ATTACK2MISS ); break;
+			case 2:
+				SendWeaponAnim( WRENCH_ATTACK3MISS ); break;
 			}
-			else
-			{
-				switch( (m_iSwing++) % 3 )
-				{
-				case 0:
-					SendWeaponAnim( WRENCH_ATTACK1MISS ); break;
-				case 1:
-					SendWeaponAnim( WRENCH_ATTACK2MISS ); break;
-				case 2:
-					SendWeaponAnim( WRENCH_ATTACK3MISS ); break;
-				}
-				m_flNextPrimaryAttack = gpGlobals->time + 0.75;
-				m_flNextSecondaryAttack = gpGlobals->time + 0.75;
+			m_flNextPrimaryAttack = gpGlobals->time + WRENCH_DELAY;
+			m_flNextSecondaryAttack = gpGlobals->time + WRENCH_DELAY;
 
-				// play wiff or swish sound
-				switch( RANDOM_LONG( 0, 1 ) )
-				{
-				case 0:
-					EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_miss1.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
-					break;
-				case 1:
-					EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_miss2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
-					break;
-				}
+			// play wiff or swish sound
+			switch( RANDOM_LONG( 0, 1 ) )
+			{
+			case 0:
+				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_miss1.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+				break;
+			case 1:
+				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_miss2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+				break;
 			}
 
 			// player "shoot" animation
@@ -262,35 +251,21 @@ BOOL CWrench::Swing( bool bFirst )
 		// player "shoot" animation
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
-		float flDamage;
-
-		if( m_bIsAlt )
+		switch( (m_iSwing++) % 3 )
 		{
-			SendWeaponAnim( WRENCH_ALT_HIT );
-			//flDamage = ( gpGlobals->time - m_flBigSwingStart ) * ( gSkillData.plrDmgWrench + 25 );
-
-			m_flNextPrimaryAttack = gpGlobals->time + 1;
-			m_flNextSecondaryAttack = gpGlobals->time + 1;
+		case 0:
+			SendWeaponAnim( WRENCH_ATTACK1HIT ); break;
+		case 1:
+			SendWeaponAnim( WRENCH_ATTACK2HIT ); break;
+		case 2:
+			SendWeaponAnim( WRENCH_ATTACK3HIT ); break;
 		}
-		else
-		{
-			switch( (m_iSwing++) % 3 )
-			{
-			case 0:
-				SendWeaponAnim( WRENCH_ATTACK1HIT ); break;
-			case 1:
-				SendWeaponAnim( WRENCH_ATTACK2HIT ); break;
-			case 2:
-				SendWeaponAnim( WRENCH_ATTACK3HIT ); break;
-			}
-			flDamage = gSkillData.plrDmgWrench;
 
-			m_flNextPrimaryAttack = gpGlobals->time + 0.5;
-			m_flNextSecondaryAttack = gpGlobals->time + 0.5;
-		}
+		m_flNextPrimaryAttack = gpGlobals->time + WRENCH_DELAY;
+		m_flNextSecondaryAttack = gpGlobals->time + WRENCH_DELAY;
 
 		ClearMultiDamage( );
-		pEntity->TraceAttack(m_pPlayer->pev, flDamage, gpGlobals->v_forward, &tr, DMG_CLUB );
+		pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgWrench, gpGlobals->v_forward, &tr, DMG_CLUB );
 		ApplyMultiDamage( m_pPlayer->pev, m_pPlayer->pev );
 
 		// play thwack, smack, or dong sound
@@ -301,31 +276,18 @@ BOOL CWrench::Swing( bool bFirst )
 		{
 			if (pEntity->Classify() != CLASS_NONE && pEntity->Classify() != CLASS_MACHINE)
 			{
-				if( m_bIsAlt )
+				switch( RANDOM_LONG( 0, 2 ) )
 				{
-					switch( RANDOM_LONG( 0, 1 ) )
-					{
-					case 0:
-						EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_big_hitbod1.wav", VOL_NORM, ATTN_NORM);
-						break;
-					case 1:
-						EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_big_hitbod2.wav", VOL_NORM, ATTN_NORM);
-						break;
-					}
+				case 0:
+					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_hitbod1.wav", VOL_NORM, ATTN_NORM);
+					break;
+				case 1:
+					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_hitbod2.wav", VOL_NORM, ATTN_NORM);
+					break;
+				case 2:
+					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_hitbod3.wav", VOL_NORM, ATTN_NORM);
+					break;
 				}
-				else
-					switch( RANDOM_LONG( 0, 2 ) )
-					{
-					case 0:
-						EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_hitbod1.wav", VOL_NORM, ATTN_NORM);
-						break;
-					case 1:
-						EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_hitbod2.wav", VOL_NORM, ATTN_NORM);
-						break;
-					case 2:
-						EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_hitbod3.wav", VOL_NORM, ATTN_NORM);
-						break;
-					}
 
 				m_pPlayer->m_iWeaponVolume = WRENCH_BODYHIT_VOLUME;
 
@@ -354,26 +316,15 @@ BOOL CWrench::Swing( bool bFirst )
 			}
 
 			// also play wrench strike
-			if( m_bIsAlt )
-				switch( RANDOM_LONG( 0, 1 ) )
-				{
-				case 0:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_big_hit1.wav", VOL_NORM, ATTN_NORM);
-					break;
-				case 1:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_big_hit2.wav", VOL_NORM, ATTN_NORM);
-					break;
-				}
-			else
-				switch( RANDOM_LONG( 0, 1 ) )
-				{
-				case 0:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_hit1.wav", VOL_NORM, ATTN_NORM);
-					break;
-				case 1:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_hit2.wav", VOL_NORM, ATTN_NORM);
-					break;
-				}
+			switch( RANDOM_LONG( 0, 1 ) )
+			{
+			case 0:
+				EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_hit1.wav", VOL_NORM, ATTN_NORM);
+				break;
+			case 1:
+				EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_hit2.wav", VOL_NORM, ATTN_NORM);
+				break;
+			}
 		}
 
 		// delay the decal a bit

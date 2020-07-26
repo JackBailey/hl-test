@@ -12,14 +12,16 @@ Feature List (incomplete)
 ======================
 General:
 - Dynamically adjustable model scaling
-- Replaced blood splat effects with blood streams
+- Added change-able blood effects
+- Added adjustable pain screen flash
+- Added "advanced" options
 - Fixed raw mouse input
 
 Monsters:
 - Collision is off as soon as they die
 - Lowered stuck delay
 - Re-implemented dead body "physics"
-- Added monster_hassault (by Magic Nipples)
+- Added monster_hassault
 
 Zombies:
 - Unless specified otherwise through the map, zombies will randomize between scientists, barneys, or soldiers on spawn
@@ -44,7 +46,7 @@ MP5:
 - Removed multiplayer spread
 
 Shotgun:
-- New shell ejection handling, now it actually works properly (more or less)
+- New shell ejection handling, now it actually works properly
 - Cocking sound now handled by model
 - Removed multiplayer spread
 - Changed attack and reload delays
@@ -52,17 +54,19 @@ Shotgun:
 
 To-do:
 ======================
-General:
-- Add Bass support for music playing (don't forget about FLAC, MIDI and FX plugins)
+- Add Bass support for music playing and *maybe* replace the vanilla audio system (don't forget about FLAC, MIDI and FX plugins)
+- Add weapon_wrench alt fire
 
 
 Credits & Special Thanks
 ======================
-James - An absolute shit-ton of help. He taught me almost everything I know about HL1 modding. Oh, yeah, he also gave me code for some of the minor changes in this mod.
+James - Teaching me almost everything I know about HL1 modding and minor code snippets
 
 The Spirit of Half-Life Team - Code snippet for customizable model scaling
 
-Magic Nipples - HAssault code (from his Monster Files series)
+Magic Nipples - HAssault code (from his Monster Files series) & server-side weapon implementation
+
+Solokiller - Bugfixing
 
 ZooL - Raw mouse input fix (from Half-Nuked)
 
@@ -71,6 +75,7 @@ Jane - Motivating me to make stuff
 Charlie M. - Being an asshole and annoying the shit outta me on Discord while I was trying to work
 
 Sayok & Programme - Being awesome friends and helping me out a lot
+
 
 Sam H. - Being there when I needed him the most. I love you.
 

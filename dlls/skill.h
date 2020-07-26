@@ -137,7 +137,26 @@ struct skilldata_t
 	float plrArm;
 
 	// jay - new skill defines
+
+	// hassault
 	float assaultHealth;
+
+	// panthereye
+	float panthereyeHealth;
+	float panthereyeDmg;
+
+	// gonome
+	float gonomeHealth;
+	float gonomeDmgSlash;
+	float gonomeDmgGuts;
+	float gonomeDmgBite;
+
+
+	// weapons
+	float plrDmgKnife;
+	float plrDmgWrench;
+	float plrDmgDeagle;
+	float plrDmg50cal;
 };
 
 extern	DLL_GLOBAL	skilldata_t	gSkillData;

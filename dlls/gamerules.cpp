@@ -304,7 +304,26 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.plrArm = GetSkillCvar( "sk_player_arm" );
 
 	// jay - new skill defines
+
+	// hassault
 	gSkillData.assaultHealth = GetSkillCvar( "sk_hassault_health" );
+
+	// panthereye
+	gSkillData.panthereyeHealth = GetSkillCvar( "sk_panthereye_health" );
+	gSkillData.panthereyeDmg = GetSkillCvar( "sk_panthereye_dmg" );
+
+	// gonome
+	gSkillData.gonomeHealth = GetSkillCvar( "sk_gonome_health" );
+	gSkillData.gonomeDmgSlash = GetSkillCvar( "sk_gonome_dmg_one_slash" );
+	gSkillData.gonomeDmgGuts = GetSkillCvar( "sk_gonome_dmg_guts" );
+	gSkillData.gonomeDmgBite = GetSkillCvar( "sk_gonome_dmg_bite" );
+
+
+	// weapons
+	gSkillData.plrDmgKnife = GetSkillCvar( "sk_plr_knife" );
+	gSkillData.plrDmgWrench = GetSkillCvar( "sk_plr_wrench" );
+	gSkillData.plrDmgDeagle = GetSkillCvar( "sk_plr_deagle" );
+	gSkillData.plrDmg50cal = GetSkillCvar( "sk_plr_50cal" );
 }
 
 //=========================================================

@@ -449,9 +449,59 @@ cvar_t	sk_player_leg2	= { "sk_player_leg2","1" };
 cvar_t	sk_player_leg3	= { "sk_player_leg3","1" };
 
 // jay - new skill defines
+
+// hassault
 cvar_t	sk_hassault_health1	= { "sk_hassault_health1","0" };
 cvar_t	sk_hassault_health2	= { "sk_hassault_health2","0" };
 cvar_t	sk_hassault_health3	= { "sk_hassault_health3","0" };
+
+// panthereye
+cvar_t	sk_panthereye_health1 = { "sk_panthereye_health1","0" };
+cvar_t	sk_panthereye_health2 = { "sk_panthereye_health2","0" };
+cvar_t	sk_panthereye_health3 = { "sk_panthereye_health3","0" };
+
+cvar_t	sk_panthereye_dmg1 = { "sk_panthereye_dmg1","0" };
+cvar_t	sk_panthereye_dmg2 = { "sk_panthereye_dmg2","0" };
+cvar_t	sk_panthereye_dmg3 = { "sk_panthereye_dmg3","0" };
+
+// gonome
+cvar_t	sk_gonome_health1 = { "sk_gonome_health1","0" };
+cvar_t	sk_gonome_health2 = { "sk_gonome_health2","0" };
+cvar_t	sk_gonome_health3 = { "sk_gonome_health3","0" };
+
+cvar_t	sk_gonome_dmg_one_slash1 = { "sk_gonome_dmg_one_slash1","0" };
+cvar_t	sk_gonome_dmg_one_slash2 = { "sk_gonome_dmg_one_slash2","0" };
+cvar_t	sk_gonome_dmg_one_slash3 = { "sk_gonome_dmg_one_slash3","0" };
+
+cvar_t	sk_gonome_dmg_guts1 = { "sk_gonome_dmg_guts1","0" };
+cvar_t	sk_gonome_dmg_guts2 = { "sk_gonome_dmg_guts2","0" };
+cvar_t	sk_gonome_dmg_guts3 = { "sk_gonome_dmg_guts3","0" };
+
+cvar_t	sk_gonome_dmg_bite1 = { "sk_gonome_dmg_bite1","0" };
+cvar_t	sk_gonome_dmg_bite2 = { "sk_gonome_dmg_bite2","0" };
+cvar_t	sk_gonome_dmg_bite3 = { "sk_gonome_dmg_bite3","0" };
+
+
+// combat knife
+cvar_t	sk_plr_knife1 = { "sk_plr_knife1","0" };
+cvar_t	sk_plr_knife2 = { "sk_plr_knife2","0" };
+cvar_t	sk_plr_knife3 = { "sk_plr_knife3","0" };
+
+// pipe wrench
+cvar_t	sk_plr_wrench1 = { "sk_plr_wrench1","0" };
+cvar_t	sk_plr_wrench2 = { "sk_plr_wrench2","0" };
+cvar_t	sk_plr_wrench3 = { "sk_plr_wrench3","0" };
+
+// desert eagle
+cvar_t	sk_plr_deagle1 = { "sk_plr_deagle1","0" };
+cvar_t	sk_plr_deagle2 = { "sk_plr_deagle2","0" };
+cvar_t	sk_plr_deagle3 = { "sk_plr_deagle3","0" };
+
+// .50 cal
+cvar_t	sk_plr_50cal1 = { "sk_plr_50cal1","0" };
+cvar_t	sk_plr_50cal2 = { "sk_plr_50cal2","0" };
+cvar_t	sk_plr_50cal3 = { "sk_plr_50cal3","0" };
+
 
 // END Cvars for Skill Level settings
 
@@ -890,9 +940,59 @@ void GameDLLInit( void )
 	CVAR_REGISTER ( &sk_player_leg3 );
 
 	// jay - new skill defines
+
+	// hassault
 	CVAR_REGISTER ( &sk_hassault_health1 );
 	CVAR_REGISTER ( &sk_hassault_health2 );
 	CVAR_REGISTER ( &sk_hassault_health3 );
+
+	// panthereye
+	CVAR_REGISTER ( &sk_panthereye_health1 );
+	CVAR_REGISTER ( &sk_panthereye_health2 );
+	CVAR_REGISTER ( &sk_panthereye_health3 );
+
+	CVAR_REGISTER ( &sk_panthereye_dmg1 );
+	CVAR_REGISTER ( &sk_panthereye_dmg2 );
+	CVAR_REGISTER ( &sk_panthereye_dmg3 );
+
+	// gonome
+	CVAR_REGISTER ( &sk_gonome_health1 );
+	CVAR_REGISTER ( &sk_gonome_health2 );
+	CVAR_REGISTER ( &sk_gonome_health3 );
+
+	CVAR_REGISTER ( &sk_gonome_dmg_one_slash1 );
+	CVAR_REGISTER ( &sk_gonome_dmg_one_slash2 );
+	CVAR_REGISTER ( &sk_gonome_dmg_one_slash3 );
+
+	CVAR_REGISTER ( &sk_gonome_dmg_guts1 );
+	CVAR_REGISTER ( &sk_gonome_dmg_guts2 );
+	CVAR_REGISTER ( &sk_gonome_dmg_guts3 );
+
+	CVAR_REGISTER ( &sk_gonome_dmg_bite1 );
+	CVAR_REGISTER ( &sk_gonome_dmg_bite2 );
+	CVAR_REGISTER ( &sk_gonome_dmg_bite3 );
+
+
+	// combat knife
+	CVAR_REGISTER ( &sk_plr_knife1 );
+	CVAR_REGISTER ( &sk_plr_knife2 );
+	CVAR_REGISTER ( &sk_plr_knife3 );
+
+	// pipe wrench
+	CVAR_REGISTER ( &sk_plr_wrench1 );
+	CVAR_REGISTER ( &sk_plr_wrench2 );
+	CVAR_REGISTER ( &sk_plr_wrench3 );
+
+	// desert eagle
+	CVAR_REGISTER ( &sk_plr_deagle1 );
+	CVAR_REGISTER ( &sk_plr_deagle2 );
+	CVAR_REGISTER ( &sk_plr_deagle3 );
+
+	// .50 cal
+	CVAR_REGISTER ( &sk_plr_50cal1 );
+	CVAR_REGISTER ( &sk_plr_50cal2 );
+	CVAR_REGISTER ( &sk_plr_50cal3 );
+
 
 // END REGISTER CVARS FOR SKILL LEVEL STUFF
 

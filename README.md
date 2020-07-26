@@ -8,7 +8,7 @@ You're free to pick out any code snippets you want and use them in whatever way 
 However, if you choose to use this base in it's entirety, then you have to credit me, as well as have the source code for the mod that uses it publicly available.
 
 
-Feature List (probably incomplete)
+Feature List (incomplete)
 ======================
 General:
 - Dynamically adjustable model scaling
@@ -18,6 +18,8 @@ General:
 Monsters:
 - Collision is off as soon as they die
 - Lowered stuck delay
+- Re-implemented dead body "physics"
+- Added monster_hassault (by Magic Nipples)
 
 Zombies:
 - Unless specified otherwise through the map, zombies will randomize between scientists, barneys, or soldiers on spawn
@@ -26,6 +28,11 @@ Weapons:
 - Completely removed client-side implementation; they're now fully server-side
 - Reloading, switching weapons, etc. doesn't stop you from using stuff anymore
 - Changed ammo counts
+- Added weapon_50cal
+- Added ammo_50cal
+- Added weapon_deagle
+- Added weapon_wrench
+- Added weapon_knife
 
 Crowbar:
 - Changed and unified attack delay
@@ -41,6 +48,12 @@ Shotgun:
 - Cocking sound now handled by model
 - Removed multiplayer spread
 - Changed attack and reload delays
+
+
+To-do:
+======================
+General:
+- Add Bass support for music playing (don't forget about FLAC, MIDI and FX plugins)
 
 
 Credits & Special Thanks

@@ -745,6 +745,8 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	player.ammo_hornets		= (int)from->client.vuser2[0];
 	player.ammo_rockets		= (int)from->client.ammo_rockets;
 
+	// jay - new stuff
+	player.ammo_50cal		= (int)from->client.vuser1[3];
 	
 	// Point to current weapon object
 	if ( from->client.m_iId )
@@ -813,6 +815,9 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	to->client.ammo_cells				= player.ammo_uranium;
 	to->client.vuser2[0]				= player.ammo_hornets;
 	to->client.ammo_rockets				= player.ammo_rockets;
+
+	// jay - new stuff
+	to->client.vuser1[3]				= player.ammo_50cal;
 
 	// Make sure that weapon animation matches what the game .dll is telling us
 	//  over the wire ( fixes some animation glitches )

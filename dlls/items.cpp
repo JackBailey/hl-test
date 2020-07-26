@@ -293,9 +293,11 @@ class CItemSecurity : public CItem
 	void Precache( void )
 	{
 		PRECACHE_MODEL ("models/w_security.mdl");
+		PRECACHE_SOUND ("items/keycard.wav");	// jay - keycard pickup sound
 	}
 	BOOL MyTouch( CBasePlayer *pPlayer )
 	{
+		EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, "items/keycard.wav", VOL_NORM, ATTN_NORM );	// jay - keycard pickup sound
 		pPlayer->m_rgItems[ITEM_SECURITY] += 1;
 		return TRUE;
 	}

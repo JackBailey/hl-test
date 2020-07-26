@@ -360,6 +360,9 @@ public:
 
 	enum EGON_FIRESTATE { FIRE_OFF, FIRE_CHARGE };
 	int m_fireState;
+
+	// jay - new stuff
+	int ammo_50cal;
 };
 
 

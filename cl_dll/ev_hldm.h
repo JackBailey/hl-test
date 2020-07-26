@@ -21,6 +21,10 @@ typedef	enum
 	BULLET_MONSTER_9MM,
 	BULLET_MONSTER_MP5,
 	BULLET_MONSTER_12MM,
+
+	// jay - new stuff
+	BULLET_PLAYER_DEAGLE,
+	BULLET_PLAYER_50CAL,
 } Bullet;
 
 enum glock_e {

@@ -1,15 +1,9 @@
 /***
 *
-*	Copyright (c) 1999, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
-*	All Rights Reserved.
+*	Copyright (c) 2020, Jay Foremska.
 *
-*   Use, distribution, and modification of this source code and/or resulting
-*   object code is restricted to non-commercial enhancements to products from
-*   Valve LLC.  All other use, distribution, or modification is prohibited
-*   without written permission from Valve LLC.
+*	Use and modification of this code is allowed as long
+*	as credit is provided! Enjoy!
 *
 ****/
 
@@ -22,14 +16,29 @@
 #include "player.h"
 #include "gamerules.h"
 
+#define	KNIFE_DELAY	0.25
 
-#define	CROWBAR_BODYHIT_VOLUME 128
-#define	CROWBAR_WALLHIT_VOLUME 512
+#define KNIFE_BODYHIT_VOLUME	512
+#define KNIFE_WALLHIT_VOLUME	128
 
-#define	CROWBAR_VIEWPUNCH 3	// jay - crowbar viewpunch
-#define	CROWBAR_DELAY 0.4	// jay - unified attack delay
 
-class CCrowbar : public CBasePlayerWeapon
+enum knife_e
+{
+	KNIFE_IDLE1 = 0,
+	KNIFE_DRAW,
+	KNIFE_HOLSTER,
+	KNIFE_ATTACK1HIT,
+	KNIFE_ATTACK1MISS,
+	KNIFE_ATTACK2MISS,
+	KNIFE_ATTACK2HIT,
+	KNIFE_ATTACK3MISS,
+	KNIFE_ATTACK3HIT,
+	KNIFE_IDLE2,
+	KNIFE_IDLE3
+};
+
+
+class CKnife : public CBasePlayerWeapon
 {
 public:
 	void Spawn( void );
@@ -39,86 +48,69 @@ public:
 	void EXPORT Smack( void );
 	int GetItemInfo(ItemInfo *p);
 
+	void FindHullIntersection( const Vector &vecSrc, TraceResult &tr, float *mins, float *maxs, edict_t *pEntity );
 	void PrimaryAttack( void );
 	int Swing( int fFirst );
 	BOOL Deploy( void );
 	void Holster( void );
 	int m_iSwing;
 	TraceResult m_trHit;
-
-	void FindHullIntersection( const Vector &vecSrc, TraceResult &tr, float *mins, float *maxs, edict_t *pEntity );	// jay - now a member of CCrowbar to fix conflicts
-};
-LINK_ENTITY_TO_CLASS( weapon_crowbar, CCrowbar );
-
-
-
-enum gauss_e {
-	CROWBAR_IDLE = 0,
-	CROWBAR_DRAW,
-	CROWBAR_HOLSTER,
-	CROWBAR_ATTACK1HIT,
-	CROWBAR_ATTACK1MISS,
-	CROWBAR_ATTACK2MISS,
-	CROWBAR_ATTACK2HIT,
-	CROWBAR_ATTACK3MISS,
-	CROWBAR_ATTACK3HIT
 };
 
+LINK_ENTITY_TO_CLASS( weapon_knife, CKnife );
 
-void CCrowbar::Spawn( )
+void CKnife::Spawn( )
 {
-	Precache( );
-	m_iId = WEAPON_CROWBAR;
-	SET_MODEL(ENT(pev), "models/w_crowbar.mdl");
-	m_iClip = -1;
+	Precache();
+	m_iId = WEAPON_KNIFE;
+	SET_MODEL(ENT(pev), "models/w_knife.mdl");
+	m_iClip = WEAPON_NOCLIP;
 
 	FallInit();// get ready to fall down.
 }
 
-
-void CCrowbar::Precache( void )
+void CKnife::Precache( )
 {
-	PRECACHE_MODEL("models/v_crowbar.mdl");
-	PRECACHE_MODEL("models/w_crowbar.mdl");
-	PRECACHE_MODEL("models/p_crowbar.mdl");
-	PRECACHE_SOUND("weapons/cbar_hit1.wav");
-	PRECACHE_SOUND("weapons/cbar_hit2.wav");
-	PRECACHE_SOUND("weapons/cbar_hitbod1.wav");
-	PRECACHE_SOUND("weapons/cbar_hitbod2.wav");
-	PRECACHE_SOUND("weapons/cbar_hitbod3.wav");
-	PRECACHE_SOUND("weapons/cbar_miss1.wav");
+	PRECACHE_MODEL( "models/w_knife.mdl" );
+	PRECACHE_MODEL( "models/v_knife.mdl" );
+	PRECACHE_MODEL( "models/p_crowbar.mdl" );
+
+	PRECACHE_SOUND( "weapons/knife1.wav" );
+	PRECACHE_SOUND( "weapons/knife2.wav" );
+	PRECACHE_SOUND( "weapons/knife3.wav" );
+	PRECACHE_SOUND( "weapons/knife_hit_wall1.wav" );
+	PRECACHE_SOUND( "weapons/knife_hit_wall2.wav" );
+	PRECACHE_SOUND( "weapons/knife_hit_flesh1.wav" );
+	PRECACHE_SOUND( "weapons/knife_hit_flesh2.wav" );
 }
 
-int CCrowbar::GetItemInfo(ItemInfo *p)
+int CKnife::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = NULL;
-	p->iMaxAmmo1 = -1;
+	p->iMaxAmmo1 = WEAPON_NOCLIP;
 	p->pszAmmo2 = NULL;
-	p->iMaxAmmo2 = -1;
+	p->iMaxAmmo2 = WEAPON_NOCLIP;
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->iSlot = 0;
-	p->iPosition = 0;
-	p->iId = WEAPON_CROWBAR;
-	p->iWeight = CROWBAR_WEIGHT;
+	p->iPosition = 2;
+	p->iId = WEAPON_KNIFE;
+	p->iWeight = KNIFE_WEIGHT;
 	return 1;
 }
 
-
-
-BOOL CCrowbar::Deploy( )
+BOOL CKnife::Deploy( )
 {
-	return DefaultDeploy( "models/v_crowbar.mdl", "models/p_crowbar.mdl", CROWBAR_DRAW, "crowbar" );
+	return DefaultDeploy( "models/v_knife.mdl", "models/p_crowbar.mdl", KNIFE_DRAW, "crowbar" );
 }
 
-void CCrowbar::Holster( )
+void CKnife::Holster( )
 {
 	m_pPlayer->m_flNextAttack = gpGlobals->time + 0.5;
-	SendWeaponAnim( CROWBAR_HOLSTER );
+	SendWeaponAnim( KNIFE_HOLSTER );
 }
 
-
-void CCrowbar::FindHullIntersection( const Vector &vecSrc, TraceResult &tr, float *mins, float *maxs, edict_t *pEntity )	// jay - now a member of CCrowbar to fix conflicts
+void CKnife::FindHullIntersection( const Vector &vecSrc, TraceResult &tr, float *mins, float *maxs, edict_t *pEntity )
 {
 	int			i, j, k;
 	float		distance;
@@ -162,32 +154,26 @@ void CCrowbar::FindHullIntersection( const Vector &vecSrc, TraceResult &tr, floa
 	}
 }
 
-
-void CCrowbar::PrimaryAttack()
+void CKnife::PrimaryAttack( )
 {
-	m_pPlayer->pev->punchangle.x += CROWBAR_VIEWPUNCH;	// jay - crowbar viewpunch
-
 	if (! Swing( 1 ))
 	{
-		SetThink(&CCrowbar::SwingAgain );
-		pev->nextthink = UTIL_WeaponTimeBase() + 0.1;	// magic nipples - replaced gpGlobals->time
+		SetThink(&CKnife::SwingAgain );
+		pev->nextthink = UTIL_WeaponTimeBase() + 0.1;
 	}
 }
 
-
-void CCrowbar::Smack( )
+void CKnife::Smack( )
 {
 	DecalGunshot( &m_trHit, BULLET_PLAYER_CROWBAR );
 }
 
-
-void CCrowbar::SwingAgain( void )
+void CKnife::SwingAgain( )
 {
 	Swing( 0 );
 }
 
-
-int CCrowbar::Swing( int fFirst )
+int CKnife::Swing( int fFirst )
 {
 	int fDidHit = FALSE;
 
@@ -221,15 +207,26 @@ int CCrowbar::Swing( int fFirst )
 			switch( (m_iSwing++) % 3 )
 			{
 			case 0:
-				SendWeaponAnim( CROWBAR_ATTACK1MISS ); break;
+				SendWeaponAnim( KNIFE_ATTACK1MISS ); break;
 			case 1:
-				SendWeaponAnim( CROWBAR_ATTACK2MISS ); break;
+				SendWeaponAnim( KNIFE_ATTACK2MISS ); break;
 			case 2:
-				SendWeaponAnim( CROWBAR_ATTACK3MISS ); break;
+				SendWeaponAnim( KNIFE_ATTACK3MISS ); break;
 			}
-			m_flNextPrimaryAttack = gpGlobals->time + CROWBAR_DELAY;	// jay - og was 0.5
+			m_flNextPrimaryAttack = gpGlobals->time + KNIFE_DELAY;
 			// play wiff or swish sound
-			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/cbar_miss1.wav", 1, ATTN_NORM, 0, 94 + RANDOM_LONG(0,0xF));
+			switch( RANDOM_LONG( 0, 2 ) )
+			{
+			case 0:
+				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/knife1.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+				break;
+			case 1:
+				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/knife2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+				break;
+			case 2:
+				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/knife3.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+				break;
+			}
 
 			// player "shoot" animation
 			m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
@@ -242,24 +239,24 @@ int CCrowbar::Swing( int fFirst )
 
 		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
 
-		switch( (m_iSwing++) % 3 )	// jay - og was ((m_iSwing++) % 2) + 1
+		switch( (m_iSwing++) % 3 )
 		{
 		case 0:
-			SendWeaponAnim( CROWBAR_ATTACK1HIT ); break;
+			SendWeaponAnim( KNIFE_ATTACK1HIT ); break;
 		case 1:
-			SendWeaponAnim( CROWBAR_ATTACK2HIT ); break;
+			SendWeaponAnim( KNIFE_ATTACK2HIT ); break;
 		case 2:
-			SendWeaponAnim( CROWBAR_ATTACK3HIT ); break;
+			SendWeaponAnim( KNIFE_ATTACK3HIT ); break;
 		}
 
 		// player "shoot" animation
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
 		ClearMultiDamage( );
-		pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgCrowbar, gpGlobals->v_forward, &tr, DMG_CLUB );	// jay - always do full damage
+		pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgKnife, gpGlobals->v_forward, &tr, DMG_SLASH );
 		ApplyMultiDamage( m_pPlayer->pev, m_pPlayer->pev );
 
-		m_flNextPrimaryAttack = gpGlobals->time + CROWBAR_DELAY;	// jay - og was 0.25
+		m_flNextPrimaryAttack = gpGlobals->time + KNIFE_DELAY;
 
 		// play thwack, smack, or dong sound
 		float flVol = 1.0;
@@ -269,17 +266,18 @@ int CCrowbar::Swing( int fFirst )
 		{
 			if (pEntity->Classify() != CLASS_NONE && pEntity->Classify() != CLASS_MACHINE)
 			{
-				// play thwack or smack sound
-				switch( RANDOM_LONG(0,2) )
+				switch( RANDOM_LONG( 0, 1 ) )
 				{
 				case 0:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/cbar_hitbod1.wav", 1, ATTN_NORM); break;
+					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/knife_hit_flesh1.wav", VOL_NORM, ATTN_NORM);
+					break;
 				case 1:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/cbar_hitbod2.wav", 1, ATTN_NORM); break;
-				case 2:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/cbar_hitbod3.wav", 1, ATTN_NORM); break;
+					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/knife_hit_flesh2.wav", VOL_NORM, ATTN_NORM);
+					break;
 				}
-				m_pPlayer->m_iWeaponVolume = CROWBAR_BODYHIT_VOLUME;
+
+				m_pPlayer->m_iWeaponVolume = KNIFE_BODYHIT_VOLUME;
+
 				if (!pEntity->IsAlive() )
 					return TRUE;
 				else
@@ -304,27 +302,24 @@ int CCrowbar::Swing( int fFirst )
 				fvolbar = 1;
 			}
 
-			// also play crowbar strike
-			switch( RANDOM_LONG(0,1) )
+			// also play knife strike
+			switch( RANDOM_LONG( 0, 1 ) )
 			{
 			case 0:
-				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hit1.wav", fvolbar, ATTN_NORM, 0, 98 + RANDOM_LONG(0,3)); 
+				EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/knife_hit_wall1.wav", VOL_NORM, ATTN_NORM);
 				break;
 			case 1:
-				EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/cbar_hit2.wav", fvolbar, ATTN_NORM, 0, 98 + RANDOM_LONG(0,3)); 
+				EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/knife_hit_wall2.wav", VOL_NORM, ATTN_NORM);
 				break;
 			}
 		}
 
 		// delay the decal a bit
 		m_trHit = tr;
-		SetThink( &CCrowbar::Smack );
+		SetThink( &CKnife::Smack );
 		pev->nextthink = gpGlobals->time + 0.2;
 
-		m_pPlayer->m_iWeaponVolume = flVol * CROWBAR_WALLHIT_VOLUME;
+		m_pPlayer->m_iWeaponVolume = flVol * KNIFE_WALLHIT_VOLUME;
 	}
 	return fDidHit;
 }
-
-
-

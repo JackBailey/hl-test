@@ -79,6 +79,12 @@ public:
 #define	WEAPON_SATCHEL			14
 #define	WEAPON_SNARK			15
 
+// jay - new stuff
+#define	WEAPON_KNIFE	16
+#define	WEAPON_WRENCH	17
+#define	WEAPON_DEAGLE	18
+#define	WEAPON_50CAL	19
+
 #define WEAPON_ALLWEAPONS		(~(1<<WEAPON_SUIT))
 
 #define WEAPON_SUIT				31	// ?????
@@ -105,6 +111,12 @@ public:
 #define SATCHEL_WEIGHT		-10
 #define TRIPMINE_WEIGHT		-10
 
+// jay - new stuff
+#define	KNIFE_WEIGHT		0
+#define	WRENCH_WEIGHT		0
+#define	DEAGLE_WEIGHT		15
+#define	_50CAL_WEIGHT		20
+
 
 // weapon clip/carry ammo capacities
 #define URANIUM_MAX_CARRY		100
@@ -120,10 +132,12 @@ public:
 #define HORNET_MAX_CARRY		8
 #define M203_GRENADE_MAX_CARRY	10
 
+// jay - new stuff
+#define	_50CAL_MAX_CARRY	200
+
 // the maximum amount of ammo each weapon's clip can hold
 #define WEAPON_NOCLIP			-1
 
-//#define CROWBAR_MAX_CLIP		WEAPON_NOCLIP
 #define GLOCK_MAX_CLIP			18	// jay - og was 17
 #define PYTHON_MAX_CLIP			6
 #define MP5_MAX_CLIP			30	// jay - og was 50
@@ -138,6 +152,9 @@ public:
 #define SATCHEL_MAX_CLIP		WEAPON_NOCLIP
 #define TRIPMINE_MAX_CLIP		WEAPON_NOCLIP
 #define SNARK_MAX_CLIP			WEAPON_NOCLIP
+
+// jay - new stuff
+#define	DEAGLE_MAX_CLIP	7
 
 
 // the default amount of ammo that comes with each gun when it spawns
@@ -157,6 +174,10 @@ public:
 #define SNARK_DEFAULT_GIVE			5
 #define HIVEHAND_DEFAULT_GIVE		8
 
+// jay - new stuff
+#define	DEAGLE_DEFAULT_GIVE	DEAGLE_MAX_CLIP
+#define	_50CAL_DEFAULT_GIVE	50
+
 // The amount of ammo given to a player by an ammo item.
 #define AMMO_URANIUMBOX_GIVE	20
 #define AMMO_GLOCKCLIP_GIVE		GLOCK_MAX_CLIP
@@ -170,6 +191,9 @@ public:
 #define AMMO_URANIUMBOX_GIVE	20
 #define AMMO_SNARKBOX_GIVE		SNARK_DEFAULT_GIVE	// jay - og was 5
 
+// jay - new stuff
+#define	AMMO_50CALBOX_GIVE	_50CAL_DEFAULT_GIVE
+
 // bullet types
 typedef	enum
 {
@@ -179,6 +203,9 @@ typedef	enum
 	BULLET_PLAYER_357, // python
 	BULLET_PLAYER_BUCKSHOT, // shotgun
 	BULLET_PLAYER_CROWBAR, // crowbar swipe
+	// jay - new stuff
+	BULLET_PLAYER_50CAL,
+	BULLET_PLAYER_DEAGLE,
 
 	BULLET_MONSTER_9MM,
 	BULLET_MONSTER_MP5,

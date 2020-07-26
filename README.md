@@ -56,6 +56,10 @@ To-do:
 ======================
 - Add Bass support for music playing and *maybe* replace the vanilla audio system (don't forget about FLAC, MIDI and FX plugins)
 - Add weapon_wrench alt fire
+- Add monster_panthereye
+- Add monster_gonome
+- Add "Explosive" spawnflag to monster_houndeye
+- Add "Fast" and "Strong" spawnflags to monster_alien_slave
 
 
 Credits & Special Thanks

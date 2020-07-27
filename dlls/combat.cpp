@@ -1367,7 +1367,7 @@ FireBullets
 Go to the trouble of combining multiple pellets into a single damage call.
 ================
 */
-void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t* pevAttacker)
+void CBaseEntity::FireBullets( ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int flashRadius, int iDamage, entvars_t* pevAttacker )	// jay - added new var
 {
 	static int tracerCount;
 	int tracer;
@@ -1380,6 +1380,20 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 
 	ClearMultiDamage();
 	gMultiDamage.type = DMG_BULLET | DMG_NEVERGIB;
+
+	// jay - dlight muzzles
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY, vecSrc );
+		WRITE_BYTE( TE_DLIGHT );
+		WRITE_COORD( vecSrc.x );
+		WRITE_COORD( vecSrc.y );
+		WRITE_COORD( vecSrc.z );
+		WRITE_BYTE( flashRadius * 0.75 );
+		WRITE_BYTE( 128 );	// red
+		WRITE_BYTE( 48 );	// green
+		WRITE_BYTE( 0 );	// blue
+		WRITE_BYTE( 3 );	// life ( * 10 )
+		WRITE_BYTE( 24 );	// decay
+	MESSAGE_END( );
 
 	for (ULONG iShot = 1; iShot <= cShots; iShot++)
 	{
@@ -1415,14 +1429,8 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 
 			if (iTracerFreq != 1)		// guns that always trace also always decal
 				tracer = 1;
-			switch (iBulletType)
-			{
-			case BULLET_PLAYER_MP5:
-			case BULLET_MONSTER_MP5:
-			case BULLET_MONSTER_9MM:
-			case BULLET_MONSTER_12MM:
-			default:
-				MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, vecTracerSrc);
+
+			MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, vecTracerSrc);
 				WRITE_BYTE(TE_TRACER);
 				WRITE_COORD(vecTracerSrc.x);
 				WRITE_COORD(vecTracerSrc.y);
@@ -1430,10 +1438,7 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 				WRITE_COORD(tr.vecEndPos.x);
 				WRITE_COORD(tr.vecEndPos.y);
 				WRITE_COORD(tr.vecEndPos.z);
-				MESSAGE_END();
-
-				break;
-			}
+			MESSAGE_END();
 		}
 		// do damage, paint decals
 		if (tr.flFraction != 1.0)
@@ -1452,39 +1457,39 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 			default:
 			case BULLET_PLAYER_9MM:
 				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg9MM, vecDir, &tr, DMG_BULLET);
-				if (!tracer)
-				{
+				//if (!tracer)
+				//{
 					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
 					DecalGunshot(&tr, iBulletType);
-				}
+				//}
 				break;
 
 			case BULLET_PLAYER_MP5:
 				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgMP5, vecDir, &tr, DMG_BULLET);
-				if (!tracer)
-				{
+				//if (!tracer)
+				//{
 					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
 					DecalGunshot(&tr, iBulletType);
-				}
+				//}
 				break;
 
 			case BULLET_PLAYER_BUCKSHOT:
 				// make distance based!
 				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmgBuckshot, vecDir, &tr, DMG_BULLET);
-				if (!tracer)
-				{
+				//if (!tracer)
+				//{
 					// TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
 					DecalGunshot(&tr, iBulletType);
-				}
+				//}
 				break;
 
 			case BULLET_PLAYER_357:
 				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg357, vecDir, &tr, DMG_BULLET);
-				if (!tracer)
-				{
+				//if (!tracer)
+				//{
 					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
 					DecalGunshot(&tr, iBulletType);
-				}
+				//}
 				break;
 
 			case BULLET_MONSTER_9MM:
@@ -1566,22 +1571,6 @@ void CBaseEntity :: TraceBleed( float flDamage, Vector vecDir, TraceResult *ptr,
 	float flNoise;
 	int cCount;
 	int i;
-
-/*
-	if ( !IsAlive() )
-	{
-		// dealing with a dead monster. 
-		if ( pev->max_health <= 0 )
-		{
-			// no blood decal for a monster that has already decalled its limit.
-			return; 
-		}
-		else
-		{
-			pev->max_health--;
-		}
-	}
-*/
 
 	if (flDamage < 10)
 	{

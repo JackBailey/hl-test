@@ -179,7 +179,7 @@ void C50cal::PrimaryAttack()
 	Vector vecSrc	 = m_pPlayer->GetGunPosition( );
 	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 	
-	m_pPlayer->FireBullets( 1, vecSrc, vecAiming, VECTOR_CONE_3DEGREES, 8192, BULLET_PLAYER_50CAL, 1 );
+	m_pPlayer->FireBullets( 1, vecSrc, vecAiming, VECTOR_CONE_3DEGREES, 8192, BULLET_PLAYER_50CAL, 1, 32 );
 
 	if ( !HasAmmo() )
 		// HEV suit - indicate out of ammo condition
@@ -191,8 +191,8 @@ void C50cal::PrimaryAttack()
 
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );
 
-	m_pPlayer->pev->punchangle.x = RANDOM_FLOAT( -5.0, 5.0 );
-	m_pPlayer->pev->punchangle.y = RANDOM_FLOAT( -2.5, 2.5 );
+	m_pPlayer->pev->punchangle.x = RANDOM_FLOAT( -3.5, 3.5 );
+	m_pPlayer->pev->punchangle.y = RANDOM_FLOAT( -1.75, 1.75 );
 }
 
 

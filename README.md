@@ -1,6 +1,10 @@
+Resource repo
+======================
+https://github.com/JackBailey/hl-test-res
+
+
 HL1 Mod Testing Environment
 ======================
-
 This repository serves as a main hub of sorts for any of my Half-Life mods. I'll be using this code as a base for all my future mods, and decided that it'd be nice to release it, since I try to fix any bugs in the vanilla code I can find, as well as add features that I personally think might be useful for general modding purposes.
 
 You're free to pick out any code snippets you want and use them in whatever way you want to. Credit would be nice, but isn't required in this case.
@@ -16,6 +20,7 @@ General:
 - Added adjustable pain screen flash
 - Added "advanced" options
 - Fixed raw mouse input
+- Added gunshot dlights
 
 Monsters:
 - Collision is off as soon as they die
@@ -35,6 +40,7 @@ Weapons:
 - Added weapon_deagle
 - Added weapon_wrench
 - Added weapon_knife
+- Extended bullet casing lifetime
 
 Crowbar:
 - Changed and unified attack delay
@@ -54,8 +60,12 @@ Shotgun:
 
 To-do:
 ======================
-- Add Bass support for music playing and *maybe* replace the vanilla audio system (don't forget about FLAC, MIDI and FX plugins)
+- Add BASS or SoLoud support for music
 - Add weapon_wrench alt fire
+- Add monster_panthereye
+- Add monster_gonome
+- Add "Explosive" spawnflag to monster_houndeye
+- Add "Fast" and "Strong" spawnflags to monster_alien_slave
 
 
 Credits & Special Thanks

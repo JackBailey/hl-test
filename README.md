@@ -39,6 +39,7 @@ Weapons:
 - Added weapon_deagle
 - Added weapon_wrench
 - Added weapon_knife
+- Extended bullet casing lifetime
 
 Crowbar:
 - Changed and unified attack delay

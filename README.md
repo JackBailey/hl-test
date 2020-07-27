@@ -1,6 +1,10 @@
+Resource repo
+======================
+https://github.com/JackBailey/hl-test-res
+
+
 HL1 Mod Testing Environment
 ======================
-
 This repository serves as a main hub of sorts for any of my Half-Life mods. I'll be using this code as a base for all my future mods, and decided that it'd be nice to release it, since I try to fix any bugs in the vanilla code I can find, as well as add features that I personally think might be useful for general modding purposes.
 
 You're free to pick out any code snippets you want and use them in whatever way you want to. Credit would be nice, but isn't required in this case.

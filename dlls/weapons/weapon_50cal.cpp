@@ -231,14 +231,13 @@ class C50calAmmoClip : public CBasePlayerAmmo
 	void Precache( void )
 	{
 		PRECACHE_MODEL ("models/w_50cal_ammo.mdl");
-		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
 	{ 
 		int bResult = (pOther->GiveAmmo( AMMO_50CALBOX_GIVE, "50cal", _50CAL_MAX_CARRY) != -1);
 		if (bResult)
 		{
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
+			EMIT_SOUND(ENT(pev), CHAN_ITEM, pAmmoSounds[ RANDOM_LONG( 0, 3 ) ], VOL_NORM, ATTN_NORM);	// jay - ammo pickup sound
 		}
 		return bResult;
 	}

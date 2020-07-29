@@ -581,13 +581,12 @@ class CCrossbowAmmo : public CBasePlayerAmmo
 	void Precache( void )
 	{
 		PRECACHE_MODEL ("models/w_crossbow_clip.mdl");
-		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
 	{ 
 		if (pOther->GiveAmmo( AMMO_CROSSBOWCLIP_GIVE, "bolts", BOLT_MAX_CARRY ) != -1)
 		{
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
+			EMIT_SOUND(ENT(pev), CHAN_ITEM, pAmmoSounds[ RANDOM_LONG( 1, 2 ) ], VOL_NORM, ATTN_NORM);	// jay - ammo pickup sound
 			return TRUE;
 		}
 		return FALSE;

@@ -320,13 +320,25 @@ class CPythonAmmo : public CBasePlayerAmmo
 	void Precache( void )
 	{
 		PRECACHE_MODEL ("models/w_357ammobox.mdl");
-		PRECACHE_SOUND("items/9mmclip1.wav");
+
+		// jay - ammo pickup sounds
+		PRECACHE_SOUND( "items/ammopickup1.wav" );
+		PRECACHE_SOUND( "items/ammopickup2.wav" );
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
 	{ 
 		if (pOther->GiveAmmo( AMMO_357BOX_GIVE, "357", _357_MAX_CARRY ) != -1)
 		{
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
+			// jay - ammo pickup sounds
+			switch( RANDOM_LONG( 0, 1 ) )
+			{
+			case 0:
+				EMIT_SOUND( ENT(pev), CHAN_ITEM, "items/ammopickup1.wav", VOL_NORM, ATTN_NORM );
+				break;
+			case 1:
+				EMIT_SOUND( ENT(pev), CHAN_ITEM, "items/ammopickup2.wav", VOL_NORM, ATTN_NORM );
+				break;
+			}
 			return TRUE;
 		}
 		return FALSE;

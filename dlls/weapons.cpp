@@ -662,7 +662,20 @@ void CBasePlayerItem::DefaultTouch( CBaseEntity *pOther )
 	if (pOther->AddPlayerItem( this ))
 	{
 		AttachToPlayer( pPlayer );
-		EMIT_SOUND(ENT(pPlayer->pev), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM);
+
+		// jay - weapon pickup sounds
+		switch( RANDOM_LONG( 0, 2 ) )
+		{
+		case 0:
+			EMIT_SOUND( ENT(pPlayer->pev), CHAN_ITEM, "items/gunpickup1.wav", VOL_NORM, ATTN_NORM );
+			break;
+		case 1:
+			EMIT_SOUND( ENT(pPlayer->pev), CHAN_ITEM, "items/gunpickup2.wav", VOL_NORM, ATTN_NORM );
+			break;
+		case 2:
+			EMIT_SOUND( ENT(pPlayer->pev), CHAN_ITEM, "items/gunpickup3.wav", VOL_NORM, ATTN_NORM );
+			break;
+		}
 	}
 
 	SUB_UseTargets( pOther, USE_TOGGLE, 0 ); // UNDONE: when should this happen?
@@ -918,6 +931,15 @@ void CBasePlayerWeapon::SendWeaponAnim( int iAnim, int skiplocal, int body )
 	MESSAGE_END();
 }
 
+// jay - weapon pickup sounds
+const char *CBasePlayerWeapon::pWeaponSounds[] =
+{
+	"items/gunpickup1.wav",
+	"items/gunpickup2.wav",
+	"items/gunpickup3.wav",
+	"items/gunpickup4.wav",
+};
+
 BOOL CBasePlayerWeapon :: AddPrimaryAmmo( int iCount, char *szName, int iMaxClip, int iMaxCarry )
 {
 	int iIdAmmo;
@@ -948,7 +970,7 @@ BOOL CBasePlayerWeapon :: AddPrimaryAmmo( int iCount, char *szName, int iMaxClip
 		{
 			// play the "got ammo" sound only if we gave some ammo to a player that already had this gun.
 			// if the player is just getting this gun for the first time, DefaultTouch will play the "picked up gun" sound for us.
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
+			EMIT_SOUND( ENT(pev), CHAN_ITEM, pWeaponSounds[ RANDOM_LONG(0, ARRAYSIZE(pWeaponSounds)-1) ], VOL_NORM, ATTN_NORM );	// jay - weapon pickup sound
 		}
 	}
 
@@ -967,7 +989,7 @@ BOOL CBasePlayerWeapon :: AddSecondaryAmmo( int iCount, char *szName, int iMax )
 	if (iIdAmmo > 0)
 	{
 		m_iSecondaryAmmoType = iIdAmmo;
-		EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
+		EMIT_SOUND( ENT(pev), CHAN_ITEM, pWeaponSounds[ RANDOM_LONG(1, ARRAYSIZE(pWeaponSounds)-1) ], VOL_NORM, ATTN_NORM );	// jay - ammo pickup sound
 	}
 	return iIdAmmo > 0 ? TRUE : FALSE;
 }
@@ -1108,6 +1130,15 @@ void CBasePlayerAmmo::Spawn( void )
 
 	SetTouch( &CBasePlayerAmmo::DefaultTouch );
 }
+
+// jay - ammo pickup sounds
+const char *CBasePlayerAmmo::pAmmoSounds[] =
+{
+	"items/gunpickup2.wav",
+	"items/gunpickup1.wav",
+	"items/gunpickup3.wav",
+	"items/gunpickup4.wav",
+};
 
 CBaseEntity* CBasePlayerAmmo::Respawn( void )
 {
@@ -1405,7 +1436,20 @@ void CWeaponBox::Touch( CBaseEntity *pOther )
 		}
 	}
 
-	EMIT_SOUND( pOther->edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM );
+	// jay - weapon pickup sounds
+	switch( RANDOM_LONG( 0, 2 ) )
+	{
+	case 0:
+		EMIT_SOUND( ENT(pPlayer->pev), CHAN_ITEM, "items/gunpickup1.wav", VOL_NORM, ATTN_NORM );
+		break;
+	case 1:
+		EMIT_SOUND( ENT(pPlayer->pev), CHAN_ITEM, "items/gunpickup2.wav", VOL_NORM, ATTN_NORM );
+		break;
+	case 2:
+		EMIT_SOUND( ENT(pPlayer->pev), CHAN_ITEM, "items/gunpickup3.wav", VOL_NORM, ATTN_NORM );
+		break;
+	}
+
 	SetTouch(NULL);
 	UTIL_Remove(this);
 }

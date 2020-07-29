@@ -169,6 +169,15 @@ void CItem::Materialize( void )
 	SetTouch( &CItem::ItemTouch );
 }
 
+// jay - item pickup sounds
+
+const char *CItem::pItemSounds[] =
+{
+	"items/gunpickup1.wav",
+	"items/gunpickup3.wav",
+	"items/gunpickup4.wav",
+};
+
 #define SF_SUIT_SHORTLOGON		0x0001
 
 class CItemSuit : public CItem
@@ -213,7 +222,6 @@ class CItemBattery : public CItem
 	void Precache( void )
 	{
 		PRECACHE_MODEL ("models/w_battery.mdl");
-		PRECACHE_SOUND( "items/gunpickup2.wav" );
 	}
 	BOOL MyTouch( CBasePlayer *pPlayer )
 	{
@@ -231,7 +239,7 @@ class CItemBattery : public CItem
 			pPlayer->pev->armorvalue += gSkillData.batteryCapacity;
 			pPlayer->pev->armorvalue = min(pPlayer->pev->armorvalue, MAX_NORMAL_BATTERY);
 
-			EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM );
+			EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, pItemSounds[ RANDOM_LONG(0,ARRAYSIZE(pItemSounds)-1) ], VOL_NORM, ATTN_NORM );	// jay - item pickup sound
 
 			MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
 				WRITE_STRING( STRING(pev->classname) );
@@ -293,11 +301,10 @@ class CItemSecurity : public CItem
 	void Precache( void )
 	{
 		PRECACHE_MODEL ("models/w_security.mdl");
-		PRECACHE_SOUND ("items/keycard.wav");	// jay - keycard pickup sound
 	}
 	BOOL MyTouch( CBasePlayer *pPlayer )
 	{
-		EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, "items/keycard.wav", VOL_NORM, ATTN_NORM );	// jay - keycard pickup sound
+		EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, pItemSounds[ RANDOM_LONG(0,ARRAYSIZE(pItemSounds)-1) ], VOL_NORM, ATTN_NORM );	// jay - item pickup sound
 		pPlayer->m_rgItems[ITEM_SECURITY] += 1;
 		return TRUE;
 	}

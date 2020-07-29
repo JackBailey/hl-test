@@ -24,6 +24,9 @@ public:
 	void	EXPORT ItemTouch( CBaseEntity *pOther );
 	void	EXPORT Materialize( void );
 	virtual BOOL MyTouch( CBasePlayer *pPlayer ) { return FALSE; };
+
+	// jay - item pickup sounds
+	static const char *pItemSounds[];
 };
 
 #endif // ITEMS_H

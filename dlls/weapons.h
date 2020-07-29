@@ -385,6 +385,8 @@ public:
 	float	m_flPrevPrimaryAttack;
 	float	m_flLastFireTime;			
 
+	// jay - weapon pickup sounds
+	static const char *pWeaponSounds[];
 };
 
 
@@ -397,6 +399,9 @@ public:
 
 	CBaseEntity* Respawn( void );
 	void EXPORT Materialize( void );
+
+	// jay - ammo pickup sounds
+	static const char *pAmmoSounds[];
 };
 
 

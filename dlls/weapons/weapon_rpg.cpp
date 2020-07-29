@@ -666,7 +666,6 @@ class CRpgAmmo : public CBasePlayerAmmo
 	void Precache( void )
 	{
 		PRECACHE_MODEL ("models/w_rpgammo.mdl");
-		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
 	{ 
@@ -684,7 +683,7 @@ class CRpgAmmo : public CBasePlayerAmmo
 
 		if (pOther->GiveAmmo( iGive, "rockets", ROCKET_MAX_CARRY ) != -1)
 		{
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
+			EMIT_SOUND(ENT(pev), CHAN_ITEM, pAmmoSounds[ RANDOM_LONG( 0, 3 ) ], VOL_NORM, ATTN_NORM);	// jay - ammo pickup sound
 			return TRUE;
 		}
 		return FALSE;

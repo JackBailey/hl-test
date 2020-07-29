@@ -103,6 +103,9 @@ cvar_t	*cl_painflash_brightness;
 // jay - blood type
 cvar_t	*cl_bloodtype;
 
+// jay - robogrunt
+cvar_t	*cl_robots;
+
 // These cvars are not registered (so users can't cheat), so set the ->value field directly
 // Register these cvars in V_Init() if needed for easy tweaking
 cvar_t	v_iyaw_cycle		= {"v_iyaw_cycle", "2", 0, 2};
@@ -1679,4 +1682,7 @@ void V_Init (void)
 
 	// jay - blood type
 	cl_bloodtype		= gEngfuncs.pfnRegisterVariable( "cl_bloodtype", "2", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
+
+	// jay - robogrunt
+	cl_robots			= gEngfuncs.pfnRegisterVariable( "cl_robots", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
 }

@@ -1387,7 +1387,7 @@ void CGibShooter :: Precache ( void )
 {
 	if ( g_Language == LANGUAGE_GERMAN )
 	{
-		m_iGibModelIndex = PRECACHE_MODEL ("models/germanygibs.mdl");
+		m_iGibModelIndex = PRECACHE_MODEL ("models/germangibs.mdl");	// jay - fixed typo
 	}
 	else
 	{

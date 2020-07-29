@@ -118,7 +118,6 @@ void CLegacyCineMonster :: CineSpawn( char *szModel )
 	pev->sequence		= (int)pev->impulse;
 	ResetSequenceInfo( );
 	pev->framerate = 0.0;
-
 	m_bloodColor = BLOOD_COLOR_RED;
 
 	// if no targetname, start now

@@ -1120,16 +1120,19 @@ BOOL UTIL_ShouldShowBlood( int color )
 	{
 		if ( color == BLOOD_COLOR_RED )
 		{
-			if ( CVAR_GET_FLOAT("violence_hblood") != 0 )
-				return TRUE;
+			if ( !CVAR_GET_FLOAT("violence_hblood") )	// jay - slight refactor
+				return FALSE;
 		}
 		else
 		{
-			if ( CVAR_GET_FLOAT("violence_ablood") != 0 )
-				return TRUE;
+			if ( !CVAR_GET_FLOAT("violence_ablood") )	// jay - slight refactor
+				return FALSE;
 		}
+
+		return TRUE;	// jay - slight refactor
 	}
-	return FALSE;
+
+	return FALSE;	// jay - slight refactor
 }
 
 int UTIL_PointContents(	const Vector &vec )
@@ -1205,6 +1208,10 @@ Vector UTIL_RandomBloodVector( void )
 
 void UTIL_BloodDecalTrace( TraceResult *pTrace, int bloodColor )
 {
+	// jay - robogrunt
+	if( bloodColor == BLOOD_SPARKS )
+		return;
+
 	if ( UTIL_ShouldShowBlood( bloodColor ) )
 	{
 		if ( bloodColor == BLOOD_COLOR_RED )

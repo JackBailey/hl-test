@@ -54,7 +54,7 @@ extern int gmsgCurWeapon;
 
 MULTIDAMAGE gMultiDamage;
 
-#define TRACER_FREQ		4			// Tracers fire every fourth bullet
+#define TRACER_FREQ		1			// Tracers fire every fourth bullet	// jay - nah, every bullet pls
 
 
 //=========================================================
@@ -138,12 +138,12 @@ void AddMultiDamage( entvars_t *pevInflictor, CBaseEntity *pEntity, float flDama
 }
 
 // jay - new blood effect stuff
-void SpawnBloodStream( Vector vecSpot, int bloodColor )
+void SpawnBloodStream( Vector vecSpot, int bloodColor, int flDamage )
 {
 	if (bloodColor == BLOOD_COLOR_GREEN)
-		UTIL_BloodStream( vecSpot, -g_vecAttackDir, bloodColor, 200);	// og dir was g_vecAttackDir (towards attacker)
+		UTIL_BloodStream( vecSpot, -g_vecAttackDir, bloodColor, flDamage * 10);
 	else
-		UTIL_BloodStream( vecSpot, -g_vecAttackDir, (unsigned short)73, 200);	// og dir was g_vecAttackDir (towards attacker)
+		UTIL_BloodStream( vecSpot, -g_vecAttackDir, (unsigned short)73, flDamage * 10);
 }
 
 /*
@@ -153,6 +153,27 @@ SpawnBlood
 */
 void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage)
 {
+	// jay - new spark "blood"
+	if( bloodColor == BLOOD_SPARKS )
+	{
+		UTIL_Sparks( vecSpot );
+		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+			WRITE_BYTE( TE_SMOKE );
+			WRITE_COORD( vecSpot.x );
+			WRITE_COORD( vecSpot.y );
+			WRITE_COORD( vecSpot.z );
+			WRITE_SHORT( g_sModelIndexSmoke );
+			WRITE_BYTE( 15 ); // scale * 10
+			WRITE_BYTE( 10 + RANDOM_LONG( 0, 5 ) ); // framerate
+		MESSAGE_END();
+
+		return;
+	}
+
+	// jay - check if blood is enabled
+	if( !UTIL_ShouldShowBlood( bloodColor ) )
+		return;	// if off, don't spawn blood
+
 	// jay - allow player to change the blood effect style
 	switch( (int)CVAR_GET_FLOAT( "cl_bloodtype" ) )
 	{
@@ -161,11 +182,11 @@ void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage)
 		UTIL_BloodDrips( vecSpot, g_vecAttackDir, bloodColor, (int)flDamage );
 		break;
 	case 1:	// streams
-		SpawnBloodStream( vecSpot, bloodColor );
+		SpawnBloodStream( vecSpot, bloodColor, (int)flDamage );
 		break;
 	case 2:	// both
 		UTIL_BloodDrips( vecSpot, g_vecAttackDir, bloodColor, (int)flDamage );
-		SpawnBloodStream( vecSpot, bloodColor );
+		SpawnBloodStream( vecSpot, bloodColor, (int)flDamage );
 		break;
 	}
 }

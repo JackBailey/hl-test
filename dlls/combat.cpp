@@ -76,12 +76,6 @@ void CGib :: SpawnStickyGibs( entvars_t *pevVictim, Vector vecOrigin, int cGibs 
 			pGib->pev->origin.y = vecOrigin.y + RANDOM_FLOAT( -3, 3 );
 			pGib->pev->origin.z = vecOrigin.z + RANDOM_FLOAT( -3, 3 );
 
-			/*
-			pGib->pev->origin.x = pevVictim->absmin.x + pevVictim->size.x * (RANDOM_FLOAT ( 0 , 1 ) );
-			pGib->pev->origin.y = pevVictim->absmin.y + pevVictim->size.y * (RANDOM_FLOAT ( 0 , 1 ) );
-			pGib->pev->origin.z = pevVictim->absmin.z + pevVictim->size.z * (RANDOM_FLOAT ( 0 , 1 ) );
-			*/
-
 			// make the gib fly away from the attack vector
 			pGib->pev->velocity = g_vecAttackDir * -1;
 
@@ -122,11 +116,11 @@ void CGib :: SpawnStickyGibs( entvars_t *pevVictim, Vector vecOrigin, int cGibs 
 	}
 }
 
-void CGib :: SpawnHeadGib( entvars_t *pevVictim )
+void CGib :: SpawnHeadGib( entvars_t *pevVictim, bool forceGerman )	// jay - robogrunt
 {
 	CGib *pGib = GetClassPtr( (CGib *)NULL );
 
-	if ( g_Language == LANGUAGE_GERMAN )
+	if ( g_Language == LANGUAGE_GERMAN || forceGerman )	// jay - robogrunt
 	{
 		pGib->Spawn( "models/germangibs.mdl" );// throw one head
 		pGib->pev->body = 0;
@@ -180,7 +174,7 @@ void CGib :: SpawnHeadGib( entvars_t *pevVictim )
 	pGib->LimitVelocity();
 }
 
-void CGib :: SpawnRandomGibs( entvars_t *pevVictim, int cGibs, int human )
+void CGib :: SpawnRandomGibs( entvars_t *pevVictim, int cGibs, int human, bool forceGerman )	// jay - robogrunt
 {
 	int cSplat;
 
@@ -188,7 +182,7 @@ void CGib :: SpawnRandomGibs( entvars_t *pevVictim, int cGibs, int human )
 	{
 		CGib *pGib = GetClassPtr( (CGib *)NULL );
 
-		if ( g_Language == LANGUAGE_GERMAN )
+		if ( g_Language == LANGUAGE_GERMAN || forceGerman )	// jay - robogrunt
 		{
 			pGib->Spawn( "models/germangibs.mdl" );
 			pGib->pev->body = RANDOM_LONG(0,GERMAN_GIB_COUNT-1);

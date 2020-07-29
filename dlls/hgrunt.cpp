@@ -13,7 +13,7 @@
 *
 ****/
 //=========================================================
-// hgrunt
+// hgrunt - wild, buff, cool, hgrunt marines
 //=========================================================
 
 //=========================================================
@@ -68,6 +68,7 @@ extern DLL_GLOBAL int		g_iSkillLevel;
 #define HEAD_COMMANDER				1
 #define HEAD_SHOTGUN				2
 #define HEAD_M203					3
+#define	HEAD_BLOWNUP				4	// jay - hgrunt headshot
 #define GUN_GROUP					2
 #define GUN_MP5						0
 #define GUN_SHOTGUN					1
@@ -147,6 +148,13 @@ public:
 	void GibMonster( void );
 	void SpeakSentence( void );
 
+	// jay - hgrunt headshot
+	void PopHead( TraceResult *ptr );
+
+	// jay - robogrunt
+	bool m_bIsRobot;
+	static const char *pRoboSentences[];
+
 	int	Save( CSave &save ); 
 	int Restore( CRestore &restore );
 	
@@ -203,6 +211,7 @@ TYPEDESCRIPTION	CHGrunt::m_SaveData[] =
 //  DEFINE_FIELD( CShotgun, m_iBrassShell, FIELD_INTEGER ),
 //  DEFINE_FIELD( CShotgun, m_iShotgunShell, FIELD_INTEGER ),
 	DEFINE_FIELD( CHGrunt, m_iSentence, FIELD_INTEGER ),
+	DEFINE_FIELD( CHGrunt, m_bIsRobot, FIELD_BOOLEAN ),	// jay - robogrunt
 };
 
 IMPLEMENT_SAVERESTORE( CHGrunt, CSquadMonster );
@@ -216,6 +225,18 @@ const char *CHGrunt::pGruntSentences[] =
 	"HG_THROW", // about to throw grenade
 	"HG_CHARGE",  // running out to get the enemy
 	"HG_TAUNT", // say rude things
+};
+
+// jay - robogrunt
+const char *CHGrunt::pRoboSentences[] =
+{
+	"RG_GREN",
+	"RG_ALERT",
+	"RG_MONSTER",
+	"RG_COVER",
+	"RG_THROW",
+	"RG_CHARGE",
+	"RG_TAUNT",
 };
 
 enum
@@ -252,7 +273,12 @@ void CHGrunt :: SpeakSentence( void )
 
 	if (FOkToSpeak())
 	{
-		SENTENCEG_PlayRndSz( ENT(pev), pGruntSentences[ m_iSentence ], HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
+		// jay - robogrunt
+		if( m_bIsRobot )
+			SENTENCEG_PlayRndSz( ENT(pev), pRoboSentences[ m_iSentence ], HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch );
+		else
+			SENTENCEG_PlayRndSz( ENT(pev), pGruntSentences[ m_iSentence ], HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch );
+
 		JustSpoke();
 	}
 }
@@ -309,7 +335,43 @@ void CHGrunt :: GibMonster ( void )
 		}
 	}
 
-	CBaseMonster :: GibMonster();
+	//CBaseMonster :: GibMonster();
+
+	// jay - robogrunt
+	TraceResult	tr;
+	BOOL		gibbed = FALSE;
+
+	if( m_bIsRobot )
+	{
+		EMIT_SOUND( ENT(pev), CHAN_WEAPON, "debris/bustmetal2.wav", VOL_NORM, ATTN_NORM );
+		CGib::SpawnHeadGib( pev, true );
+		CGib::SpawnRandomGibs( pev, 4, 1, true );
+	}
+	else
+	{
+		if ( CVAR_GET_FLOAT("violence_hgibs") )	// Only the player will ever get here
+		{
+			EMIT_SOUND(ENT(pev), CHAN_WEAPON, "common/bodysplat.wav", VOL_NORM, ATTN_NORM);
+			CGib::SpawnHeadGib( pev );
+			CGib::SpawnRandomGibs( pev, 4, 1 );	// throw some human gibs.
+		}
+	}
+
+	gibbed = TRUE;
+
+	if ( !IsPlayer() )
+	{
+		if ( gibbed )
+		{
+			// don't remove players!
+			SetThink ( &CBaseMonster::SUB_Remove );
+			pev->nextthink = gpGlobals->time;
+		}
+		else
+		{
+			FadeMonster();
+		}
+	}
 }
 
 //=========================================================
@@ -620,9 +682,38 @@ void CHGrunt :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecD
 		// it's head shot anyways
 		ptr->iHitgroup = HITGROUP_HEAD;
 	}
+
+	// jay - hgrunt headshot
+	/*
+	*	Check for the following
+	*	- got hit in the head (not helmet!!!!)
+	*	- damage was higher than 15 (minimum "headshot" damage)
+	*	- the damage dealt was from a proper damagetype (DMG_BULLET or DMG_CLUB)
+	*	- skin is 0 (white, there's no black head gore bodygroup :<)
+	*/
+	if( ptr->iHitgroup == HITGROUP_HEAD && flDamage > HGRUNT_MINIMUM_HEADSHOT_DAMAGE && ( bitsDamageType & HGRUNT_DMG_HEADSHOT ) && pev->skin == 0 )
+		PopHead( ptr );
+
 	CSquadMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
 }
 
+// jay - hgrunt headshot
+// ========================================================
+// Pop head - used on headshot
+// ========================================================
+void CHGrunt :: PopHead( TraceResult *ptr )
+{
+	if( m_bIsRobot )
+		return;
+
+	if( CVAR_GET_FLOAT( "violence_hgibs" ) )
+	{
+		SetBodygroup( HEAD_GROUP, HEAD_BLOWNUP );	// boom
+		CGib::SpawnHeadGib( pev );	// whoosh
+	}
+
+	SpawnBlood( ptr->vecEndPos, m_bloodColor, 100 );	// splat
+}
 
 //=========================================================
 // TakeDamage - overridden for the grunt because the grunt
@@ -693,27 +784,28 @@ void CHGrunt :: IdleSound( void )
 			switch (RANDOM_LONG(0,2))
 			{
 			case 0: // check in
-				SENTENCEG_PlayRndSz(ENT(pev), "HG_CHECK", HGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
+				SENTENCEG_PlayRndSz(ENT(pev), m_bIsRobot ? "RG_CHECK" : "HG_CHECK", HGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);	// jay - robogrunt
 				g_fGruntQuestion = 1;
 				break;
 			case 1: // question
-				SENTENCEG_PlayRndSz(ENT(pev), "HG_QUEST", HGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
+				SENTENCEG_PlayRndSz(ENT(pev), m_bIsRobot ? "RG_QUEST" : "HG_QUEST", HGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);	// jay - robogrunt
 				g_fGruntQuestion = 2;
 				break;
 			case 2: // statement
-				SENTENCEG_PlayRndSz(ENT(pev), "HG_IDLE", HGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
+				SENTENCEG_PlayRndSz(ENT(pev), m_bIsRobot ? "RG_IDLE" : "HG_IDLE", HGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);	// jay - robogrunt
 				break;
 			}
 		}
 		else
 		{
+			// jay - robogrunt
 			switch (g_fGruntQuestion)
 			{
 			case 1: // check in
-				SENTENCEG_PlayRndSz(ENT(pev), "HG_CLEAR", HGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
+				SENTENCEG_PlayRndSz(ENT(pev), m_bIsRobot ? "RG_CLEAR" : "HG_CLEAR", HGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);	// jay - robogrunt
 				break;
 			case 2: // question 
-				SENTENCEG_PlayRndSz(ENT(pev), "HG_ANSWER", HGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
+				SENTENCEG_PlayRndSz(ENT(pev), m_bIsRobot ? "RG_ANSWER" : "HG_ANSWER", HGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);	// jay - robogrunt
 				break;
 			}
 			g_fGruntQuestion = 0;
@@ -961,7 +1053,8 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		{
 			if ( FOkToSpeak() )
 			{
-				SENTENCEG_PlayRndSz(ENT(pev), "HG_ALERT", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
+				// jay - robogrunt
+				SENTENCEG_PlayRndSz(ENT(pev), m_bIsRobot ? "RG_ALERT" : "HG_ALERT", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);	// jay - robogrunt
 				 JustSpoke();
 			}
 
@@ -980,12 +1073,26 @@ void CHGrunt :: Spawn()
 {
 	Precache( );
 
-	SET_MODEL(ENT(pev), "models/hgrunt.mdl");
+	// jay - robogrunt
+	if( CVAR_GET_FLOAT( "cl_robots" ) )
+		m_bIsRobot = true;
+
+	if( m_bIsRobot )
+	{
+		m_bIsRobot = true;
+		SET_MODEL( ENT(pev), "models/rgrunt.mdl" );
+		m_bloodColor = BLOOD_SPARKS;
+	}
+	else
+	{
+		SET_MODEL( ENT(pev), "models/hgrunt.mdl" );
+		m_bloodColor = BLOOD_COLOR_RED;
+	}
+
 	UTIL_SetSize(pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX);
 
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
-	m_bloodColor		= BLOOD_COLOR_RED;
 	pev->effects		= 0;
 	pev->health			= gSkillData.hgruntHealth;
 	m_flFieldOfView		= 0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
@@ -1045,7 +1152,11 @@ void CHGrunt :: Spawn()
 //=========================================================
 void CHGrunt :: Precache()
 {
-	PRECACHE_MODEL("models/hgrunt.mdl");
+	// jay - robogrunt
+	PRECACHE_MODEL( "models/rgrunt.mdl" );
+	PRECACHE_SOUND( "debris/bustmetal2.wav" );
+
+	PRECACHE_MODEL( "models/hgrunt.mdl" );
 
 	PRECACHE_SOUND( "hgrunt/gr_mgun1.wav" );
 	PRECACHE_SOUND( "hgrunt/gr_mgun2.wav" );
@@ -1062,6 +1173,12 @@ void CHGrunt :: Precache()
 	PRECACHE_SOUND( "hgrunt/gr_pain3.wav" );
 	PRECACHE_SOUND( "hgrunt/gr_pain4.wav" );
 	PRECACHE_SOUND( "hgrunt/gr_pain5.wav" );
+
+	// jay - robogrunt
+	PRECACHE_SOUND( "turret/tu_die.wav" );
+	PRECACHE_SOUND( "turret/tu_die2.wav" );
+	PRECACHE_SOUND( "turret/tu_die3.wav" );
+	PRECACHE_SOUND( "turret/tu_alert.wav" );
 
 	PRECACHE_SOUND( "hgrunt/gr_reload1.wav" );
 
@@ -1166,36 +1283,28 @@ void CHGrunt :: PainSound ( void )
 {
 	if ( gpGlobals->time > m_flNextPainTime )
 	{
-#if 0
-		if ( RANDOM_LONG(0,99) < 5 )
-		{
-			// pain sentences are rare
-			if (FOkToSpeak())
+		// jay - robogrunt
+		if( !m_bIsRobot )
+			switch ( RANDOM_LONG(0,6) )
 			{
-				SENTENCEG_PlayRndSz(ENT(pev), "HG_PAIN", HGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, PITCH_NORM);
-				JustSpoke();
-				return;
+			case 0:	
+				EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_pain1.wav", VOL_NORM, ATTN_NORM );	// jay - changed volume on all of these
+				break;
+			case 1:
+				EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_pain2.wav", VOL_NORM, ATTN_NORM );	
+				break;
+			case 2:
+				EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_pain3.wav", VOL_NORM, ATTN_NORM );	
+				break;
+			case 3:
+				EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_pain4.wav", VOL_NORM, ATTN_NORM );	
+				break;
+			case 4:
+				EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_pain5.wav", VOL_NORM, ATTN_NORM );	
+				break;
 			}
-		}
-#endif 
-		switch ( RANDOM_LONG(0,6) )
-		{
-		case 0:	
-			EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_pain3.wav", 1, ATTN_NORM );	
-			break;
-		case 1:
-			EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_pain4.wav", 1, ATTN_NORM );	
-			break;
-		case 2:
-			EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_pain5.wav", 1, ATTN_NORM );	
-			break;
-		case 3:
-			EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_pain1.wav", 1, ATTN_NORM );	
-			break;
-		case 4:
-			EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_pain2.wav", 1, ATTN_NORM );	
-			break;
-		}
+		else
+			EMIT_SOUND( ENT(pev), CHAN_VOICE, "turret/tu_alert.wav", VOL_NORM, ATTN_NORM );
 
 		m_flNextPainTime = gpGlobals->time + 1;
 	}
@@ -1206,27 +1315,42 @@ void CHGrunt :: PainSound ( void )
 //=========================================================
 void CHGrunt :: DeathSound ( void )
 {
-	switch ( RANDOM_LONG(0,5) )
-	{
-	case 0:	
-		EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_die1.wav", 1, ATTN_IDLE );	
-		break;
-	case 1:
-		EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_die2.wav", 1, ATTN_IDLE );	
-		break;
-	case 2:
-		EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_die3.wav", 1, ATTN_IDLE );	
-		break;
-	case 3:
-		EMIT_SOUND (ENT (pev), CHAN_VOICE, "hgrunt/gr_die4.wav", 1, ATTN_IDLE);
-		break;
-	case 4:
-		EMIT_SOUND (ENT (pev), CHAN_VOICE, "hgrunt/gr_die5.wav", 1, ATTN_IDLE);
-		break;
-	case 5:
-		EMIT_SOUND (ENT (pev), CHAN_VOICE, "hgrunt/gr_die6.wav", 1, ATTN_IDLE);
-		break;
-	}
+	// jay - robogrunt
+	if( !m_bIsRobot )
+		switch ( RANDOM_LONG(0,5) )
+		{
+		case 0:	
+			EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_die1.wav", VOL_NORM, ATTN_NORM );		// jay - changed volume and ATTEN_IDLE on all of these
+			break;
+		case 1:
+			EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_die2.wav", VOL_NORM, ATTN_NORM );	
+			break;
+		case 2:
+			EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_die3.wav", VOL_NORM, ATTN_NORM );	
+			break;
+		case 3:
+			EMIT_SOUND (ENT (pev), CHAN_VOICE, "hgrunt/gr_die4.wav", VOL_NORM, ATTN_NORM);
+			break;
+		case 4:
+			EMIT_SOUND (ENT (pev), CHAN_VOICE, "hgrunt/gr_die5.wav", VOL_NORM, ATTN_NORM);
+			break;
+		case 5:
+			EMIT_SOUND (ENT (pev), CHAN_VOICE, "hgrunt/gr_die6.wav", VOL_NORM, ATTN_NORM);
+			break;
+		}
+	else
+		switch( RANDOM_LONG( 0, 2 ) )
+		{
+		case 0:
+			EMIT_SOUND( ENT(pev), CHAN_VOICE, "turret/tu_die.wav", VOL_NORM, ATTN_NORM );
+			break;
+		case 1:
+			EMIT_SOUND( ENT(pev), CHAN_VOICE, "turret/tu_die2.wav", VOL_NORM, ATTN_NORM );
+			break;
+		case 2:
+			EMIT_SOUND( ENT(pev), CHAN_VOICE, "turret/tu_die3.wav", VOL_NORM, ATTN_NORM );
+			break;
+		}
 }
 
 //=========================================================
@@ -2030,7 +2154,7 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 				
 				if (FOkToSpeak())
 				{
-					SENTENCEG_PlayRndSz( ENT(pev), "HG_GREN", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
+					SENTENCEG_PlayRndSz( ENT(pev), m_bIsRobot ? "RG_GREN" : "HG_GREN", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);	// jay - robogrunt
 					JustSpoke();
 				}
 				return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
@@ -2079,13 +2203,13 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 						{
 							if ((m_hEnemy != NULL) && m_hEnemy->IsPlayer())
 								// player
-								SENTENCEG_PlayRndSz( ENT(pev), "HG_ALERT", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
+								SENTENCEG_PlayRndSz( ENT(pev), m_bIsRobot ? "RG_ALERT" : "HG_ALERT", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);	// jay - robogrunt
 							else if ((m_hEnemy != NULL) &&
 									(m_hEnemy->Classify() != CLASS_PLAYER_ALLY) && 
 									(m_hEnemy->Classify() != CLASS_HUMAN_PASSIVE) && 
 									(m_hEnemy->Classify() != CLASS_MACHINE))
 								// monster
-								SENTENCEG_PlayRndSz( ENT(pev), "HG_MONST", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
+								SENTENCEG_PlayRndSz( ENT(pev), m_bIsRobot ? "RG_MONST" : "HG_MONST", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);	// jay - robogrunt
 
 							JustSpoke();
 						}
@@ -2187,7 +2311,7 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 					//!!!KELLY - this grunt is about to throw or fire a grenade at the player. Great place for "fire in the hole"  "frag out" etc
 					if (FOkToSpeak())
 					{
-						SENTENCEG_PlayRndSz( ENT(pev), "HG_THROW", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
+						SENTENCEG_PlayRndSz( ENT(pev), m_bIsRobot ? "RG_THROW" : "HG_THROW", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);	// jay - robogrunt
 						JustSpoke();
 					}
 					return GetScheduleOfType( SCHED_RANGE_ATTACK2 );
@@ -2212,7 +2336,7 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 					// grunt's covered position. Good place for a taunt, I guess?
 					if (FOkToSpeak() && RANDOM_LONG(0,1))
 					{
-						SENTENCEG_PlayRndSz( ENT(pev), "HG_TAUNT", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
+						SENTENCEG_PlayRndSz( ENT(pev), m_bIsRobot ? "RG_TAUNT" : "HG_TAUNT", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);	// jay - robogrunt
 						JustSpoke();
 					}
 					return GetScheduleOfType( SCHED_STANDOFF );
@@ -2244,7 +2368,7 @@ Schedule_t* CHGrunt :: GetScheduleOfType ( int Type )
 				{
 					if (FOkToSpeak())
 					{
-						SENTENCEG_PlayRndSz( ENT(pev), "HG_THROW", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
+						SENTENCEG_PlayRndSz( ENT(pev), m_bIsRobot ? "RG_THROW" : "HG_THROW", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);	// jay - robogrunt
 						JustSpoke();
 					}
 					return slGruntTossGrenadeCover;
@@ -2452,6 +2576,13 @@ public:
 	void Spawn( void );
 	int	Classify ( void ) { return	CLASS_HUMAN_MILITARY; }
 
+	// jay - robogrunt
+	void GibMonster( void );
+	bool m_bIsRobot;
+	int	Save( CSave &save ); 
+	int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
 	void KeyValue( KeyValueData *pkvd );
 
 	int	m_iPose;// which sequence to display	-- temporary, don't need to save
@@ -2478,13 +2609,27 @@ LINK_ENTITY_TO_CLASS( monster_hgrunt_dead, CDeadHGrunt );
 //=========================================================
 void CDeadHGrunt :: Spawn( void )
 {
-	PRECACHE_MODEL("models/hgrunt.mdl");
-	SET_MODEL(ENT(pev), "models/hgrunt.mdl");
+	// jay - robogrunt
+	PRECACHE_MODEL( "models/rgrunt.mdl" );
+	PRECACHE_MODEL( "models/hgrunt.mdl" );
+
+	if( CVAR_GET_FLOAT( "cl_robots" ) )
+		m_bIsRobot = true;
+
+	if( m_bIsRobot )
+	{
+		SET_MODEL( ENT(pev), "models/rgrunt.mdl" );
+		m_bloodColor = BLOOD_SPARKS;
+	}
+	else
+	{
+		SET_MODEL( ENT(pev), "models/hgrunt.mdl" );
+		m_bloodColor = BLOOD_COLOR_RED;
+	}
 
 	pev->effects		= 0;
 	pev->yaw_speed		= 8;
 	pev->sequence		= 0;
-	m_bloodColor		= BLOOD_COLOR_RED;
 
 	pev->sequence = LookupSequence( m_szPoses[m_iPose] );
 
@@ -2526,4 +2671,50 @@ void CDeadHGrunt :: Spawn( void )
 	}
 
 	MonsterInitDead();
+}
+
+// jay - robogrunt
+TYPEDESCRIPTION CDeadHGrunt::m_SaveData[] =
+{
+	DEFINE_FIELD( CDeadHGrunt, m_bIsRobot, FIELD_BOOLEAN ),
+};
+
+IMPLEMENT_SAVERESTORE( CDeadHGrunt, CBaseMonster );
+
+void CDeadHGrunt :: GibMonster ( void )
+{
+	TraceResult	tr;
+	BOOL		gibbed = FALSE;
+
+	if( m_bIsRobot )
+	{
+		EMIT_SOUND( ENT(pev), CHAN_WEAPON, "debris/bustmetal2.wav", VOL_NORM, ATTN_NORM );
+		CGib::SpawnHeadGib( pev, true );
+		CGib::SpawnRandomGibs( pev, 4, 1, true );
+	}
+	else
+	{
+		if ( CVAR_GET_FLOAT("violence_hgibs") )	// Only the player will ever get here
+		{
+			EMIT_SOUND(ENT(pev), CHAN_WEAPON, "common/bodysplat.wav", VOL_NORM, ATTN_NORM);
+			CGib::SpawnHeadGib( pev );
+			CGib::SpawnRandomGibs( pev, 4, 1 );	// throw some human gibs.
+		}
+	}
+
+	gibbed = TRUE;
+
+	if ( !IsPlayer() )
+	{
+		if ( gibbed )
+		{
+			// don't remove players!
+			SetThink ( &CBaseMonster::SUB_Remove );
+			pev->nextthink = gpGlobals->time;
+		}
+		else
+		{
+			FadeMonster();
+		}
+	}
 }

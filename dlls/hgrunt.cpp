@@ -150,6 +150,7 @@ public:
 
 	// jay - hgrunt headshot
 	void PopHead( TraceResult *ptr );
+	bool m_bHeadPopped;
 
 	// jay - robogrunt
 	bool m_bIsRobot;
@@ -212,6 +213,7 @@ TYPEDESCRIPTION	CHGrunt::m_SaveData[] =
 //  DEFINE_FIELD( CShotgun, m_iShotgunShell, FIELD_INTEGER ),
 	DEFINE_FIELD( CHGrunt, m_iSentence, FIELD_INTEGER ),
 	DEFINE_FIELD( CHGrunt, m_bIsRobot, FIELD_BOOLEAN ),	// jay - robogrunt
+	DEFINE_FIELD( CHGrunt, m_bHeadPopped, FIELD_BOOLEAN ),	// jay - hgrunt headshot
 };
 
 IMPLEMENT_SAVERESTORE( CHGrunt, CSquadMonster );
@@ -712,6 +714,7 @@ void CHGrunt :: PopHead( TraceResult *ptr )
 		CGib::SpawnHeadGib( pev );	// whoosh
 	}
 
+	m_bHeadPopped = true;	// this is for the death sounds
 	SpawnBlood( ptr->vecEndPos, m_bloodColor, 100 );	// splat
 }
 
@@ -1317,7 +1320,7 @@ void CHGrunt :: DeathSound ( void )
 {
 	// jay - robogrunt
 	if( !m_bIsRobot )
-		switch ( RANDOM_LONG(0,5) )
+		switch ( RANDOM_LONG( 0, m_bHeadPopped ? 3 : 5 ) )	// jay - hgrunt headshot
 		{
 		case 0:	
 			EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_die1.wav", VOL_NORM, ATTN_NORM );		// jay - changed volume and ATTEN_IDLE on all of these

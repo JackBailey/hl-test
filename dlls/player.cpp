@@ -188,6 +188,9 @@ int gmsgTeamNames = 0;
 int gmsgStatusText = 0;
 int gmsgStatusValue = 0; 
 
+// jay - fmod
+int gmsgFMOD = 0;
+
 
 
 void LinkUserMessages( void )
@@ -236,6 +239,8 @@ void LinkUserMessages( void )
 	gmsgStatusText = REG_USER_MSG("StatusText", -1);
 	gmsgStatusValue = REG_USER_MSG("StatusValue", 3); 
 
+	// jay - fmod
+	gmsgFMOD = REG_USER_MSG( "FMOD", -1 );
 }
 
 LINK_ENTITY_TO_CLASS( player, CBasePlayer );
@@ -837,6 +842,16 @@ entvars_t *g_pevLastInflictor;  // Set in combat.cpp.  Used to pass the damage i
 void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 {
 	CSound *pSound;
+
+	// jay - stop fmod after dying
+	if ( !g_pGameRules->IsMultiplayer() )
+	{
+		MESSAGE_BEGIN( MSG_ALL, gmsgFMOD );
+			WRITE_STRING( "" );
+			WRITE_COORD( 1.0f );
+			WRITE_BYTE( FALSE );
+		MESSAGE_END();
+	}
 
 	// Holster weapon immediately, to allow it to cleanup
 	if ( m_pActiveItem )

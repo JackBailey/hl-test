@@ -22,6 +22,9 @@
 
 #include "vgui_TeamFortressViewport.h"
 
+// jay - fmod
+#include "audiosystem.h"
+
 #define MAX_LOGO_FRAMES 56
 
 int grgLogoFrame[MAX_LOGO_FRAMES] = 
@@ -41,6 +44,12 @@ extern cvar_t *sensitivity;
 // Think
 void CHud::Think(void)
 {
+	// jay - initialize or update fmod
+	if ( gFMOD.m_iSystemState == 1 )
+		gFMOD.Update();
+	else
+		gFMOD.Initialize();
+
 	m_scrinfo.iSize = sizeof(m_scrinfo);
 	GetScreenInfo(&m_scrinfo);
 

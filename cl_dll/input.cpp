@@ -24,6 +24,8 @@ extern "C"
 
 #include "vgui_TeamFortressViewport.h"
 
+// jay - fmod
+#include "audiosystem.h"
 
 extern int g_iAlive;
 
@@ -1019,6 +1021,10 @@ ShutdownInput
 */
 void ShutdownInput (void)
 {
+	// jay - shutdown fmod
+	if ( gFMOD.m_iSystemState == 1 )
+		gFMOD.Shutdown();
+
 	IN_Shutdown();
 	KB_Shutdown();
 }

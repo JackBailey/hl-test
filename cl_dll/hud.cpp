@@ -31,6 +31,9 @@
 #include "demo_api.h"
 #include "vgui_ScorePanel.h"
 
+// jay - fmod
+#include "audiosystem.h"
+
 hud_player_info_t	 g_PlayerInfoList[MAX_PLAYERS+1];	   // player info from the engine
 extra_player_info_t  g_PlayerExtraInfo[MAX_PLAYERS+1];   // additional player info sent directly to the client dll
 
@@ -327,12 +330,15 @@ void CHud :: Init( void )
 	m_iFOV = 0;
 
 	CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", 0 );
-	default_fov = CVAR_CREATE( "default_fov", "90", 0 );
+	default_fov = CVAR_CREATE( "default_fov", "115", 0 );	// jay - changed from 90
 	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
 	m_pCvarDraw = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
 	cl_lw = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
 
 	m_pSpriteList = NULL;
+
+	// jay - initialize fmod
+	gFMOD.InitializeHUD();
 
 	// Clear any old HUD list
 	if ( m_pHudList )

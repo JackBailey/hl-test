@@ -37,6 +37,9 @@
 
 extern DLL_GLOBAL BOOL		g_fGameOver;
 
+// jay - fmod
+extern int gmsgFMOD;
+
 extern void SetMovedir(entvars_t* pev);
 extern Vector VecBModelOrigin( entvars_t* pevBModel );
 
@@ -1488,6 +1491,13 @@ void CChangeLevel :: ChangeLevelNow( CBaseEntity *pActivator )
 		return;
 	}
 
+	// jay - stop fmod on level change
+	MESSAGE_BEGIN( MSG_ALL, gmsgFMOD );
+		WRITE_STRING( "" );
+		WRITE_COORD( 0.0f );
+		WRITE_BYTE( 0 );
+	MESSAGE_END();
+
 	// Create an entity to fire the changetarget
 	if ( m_changeTarget )
 	{
@@ -2427,4 +2437,30 @@ void CTriggerCamera::Move()
 
 	float fraction = 2 * gpGlobals->frametime;
 	pev->velocity = ((pev->movedir * pev->speed) * fraction) + (pev->velocity * (1-fraction));
+}
+
+// jay - fmod
+class CMusic : public CPointEntity
+{
+public:
+	void Spawn( void );
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+};
+
+LINK_ENTITY_TO_CLASS( env_music, CMusic );
+
+void CMusic::Spawn( void )
+{
+	pev->solid = SOLID_NOT;
+	pev->movetype = MOVETYPE_NONE;
+	SET_MODEL( ENT( pev ), STRING( pev->model ) );
+}
+
+void CMusic::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	MESSAGE_BEGIN( MSG_ALL, gmsgFMOD );
+		WRITE_STRING( (char *)STRING( pev->target ) );
+		WRITE_COORD( pev->speed );
+		WRITE_BYTE( (pev->spawnflags & 1) ? TRUE : FALSE );
+	MESSAGE_END();
 }

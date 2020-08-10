@@ -72,9 +72,6 @@
     <ClCompile Include="..\..\cl_dll\ammo_secondary.cpp">
       <Filter>Source Files\cl_dll</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\cl_dll\ammohistory.cpp">
-      <Filter>Source Files\cl_dll</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\cl_dll\battery.cpp">
       <Filter>Source Files\cl_dll</Filter>
     </ClCompile>
@@ -252,6 +249,12 @@
     <ClCompile Include="..\..\public\interface.cpp">
       <Filter>Source Files\public</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\cl_dll\audiosystem.cpp">
+      <Filter>Source Files\cl_dll</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cl_dll\ammohistory.cpp">
+      <Filter>Source Files\cl_dll</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\cl_dll\kbutton.h">
@@ -372,6 +375,9 @@
       <Filter>Header Files\cl_dll</Filter>
     </ClInclude>
     <ClInclude Include="..\..\cl_dll\view.h">
+      <Filter>Header Files\cl_dll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cl_dll\audiosystem.h">
       <Filter>Header Files\cl_dll</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1112,7 +1112,7 @@ IN_Init
 void IN_Init (void)
 {
 	m_filter				= gEngfuncs.pfnRegisterVariable ( "m_filter","0", FCVAR_ARCHIVE );
-	sensitivity				= gEngfuncs.pfnRegisterVariable ( "sensitivity","3", FCVAR_ARCHIVE ); // user mouse sensitivity setting.
+	sensitivity				= gEngfuncs.pfnRegisterVariable ( "sensitivity","8", FCVAR_ARCHIVE ); // user mouse sensitivity setting.	// jay - changed from 3
 
 	in_joystick				= gEngfuncs.pfnRegisterVariable ( "joystick","0", FCVAR_ARCHIVE );
 	joy_name				= gEngfuncs.pfnRegisterVariable ( "joyname", "joystick", 0 );

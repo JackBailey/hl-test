@@ -67,7 +67,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>$(ProjectDir)..\..\dlls\hl.def</ModuleDefinitionFile>
-      <AdditionalDependencies>..\..\lib\bass.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\lib\public\fmod_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>call ..\..\filecopy.bat $(TargetPath) ..\..\..\game\mod\dlls\$(TargetName).dll
@@ -97,7 +97,7 @@ call ..\..\filecopy.bat $(TargetDir)\$(TargetName).pdb ..\..\..\game\mod\dlls\$(
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>$(ProjectDir)..\..\dlls\hl.def</ModuleDefinitionFile>
-      <AdditionalDependencies>..\..\lib\bass.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\lib\public\fmod_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>call ..\..\filecopy.bat $(TargetPath) ..\..\..\game\mod\dlls\$(TargetName).dll
